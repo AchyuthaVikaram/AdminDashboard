@@ -12,6 +12,7 @@ const http = require('http');
 const authRoutes = require('./routes/auth.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const userRoutes = require('./routes/user.routes');
+const analyticsDataRoutes = require('./routes/analyticsData.routes');
 const WebSocketService = require('./services/websocketService');
 const { createRateLimit } = require('./middlewares/auth.middleware');
 
@@ -48,6 +49,7 @@ app.use(compression());
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use('/api/analytics-data', analyticsDataRoutes);
 
 // Trust proxy for accurate IP addresses
 app.set('trust proxy', 1);
@@ -74,6 +76,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/analytics-data', analyticsDataRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

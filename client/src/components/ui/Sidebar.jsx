@@ -63,6 +63,43 @@ const Sidebar = () => {
           );
         })}
       </nav>
+      {/* Logout Button */}
+<div className="px-4 mt-4">
+  <button
+    onClick={async () => {
+      try {
+        const token = localStorage.getItem('token');
+        await fetch('http://localhost:5000/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        // Clear storage and redirect
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login');
+      } catch (err) {
+        console.error("Logout failed:", err);
+      }
+    }}
+    className="w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all duration-200 text-red-500 hover:bg-red-500/10"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-5 h-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 002 2h4a2 2 0 002-2v-1m-8 0v-1a2 2 0 00-2-2H3a2 2 0 00-2 2v1" />
+    </svg>
+    <span className="font-medium">Logout</span>
+  </button>
+</div>
+
     </div>
   );
 };

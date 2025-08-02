@@ -16,6 +16,15 @@ const authenticateToken = async (req, res, next) => {
       });
     }
 
+    // Check if JWT_SECRET exists
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not defined in environment variables');
+      return res.status(500).json({
+        success: false,
+        message: 'Server configuration error'
+      });
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.userId).select('-password');
     
@@ -43,6 +52,21 @@ const authenticateToken = async (req, res, next) => {
     next();
   } catch (error) {
     console.error('Authentication error:', error);
+    
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(403).json({
+        success: false,
+        message: 'Invalid token format'
+      });
+    }
+    
+    if (error.name === 'TokenExpiredError') {
+      return res.status(403).json({
+        success: false,
+        message: 'Token has expired'
+      });
+    }
+    
     return res.status(403).json({
       success: false,
       message: 'Invalid or expired token'
@@ -52,6 +76,13 @@ const authenticateToken = async (req, res, next) => {
 
 // Require admin role
 const requireAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      message: 'Authentication required'
+    });
+  }
+
   if (req.user.role !== 'admin') {
     return res.status(403).json({
       success: false,
@@ -61,11 +92,34 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
+// Generic authorization middleware (backward compatibility)
+const authorize = (roles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+
+    const allowedRoles = Array.isArray(roles) ? roles : [roles];
+    
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: `Access denied. Required role: ${allowedRoles.join(' or ')}`
+      });
+    }
+    
+    next();
+  };
+};
+
 // Log activity middleware
 const logActivity = (type, description) => {
   return async (req, res, next) => {
     try {
-      if (req.user) {
+      if (req.user && Activity) {
         await Activity.create({
           userId: req.user._id,
           type,
@@ -92,7 +146,7 @@ const createRateLimit = (windowMs, max, message) => {
   const requests = new Map();
   
   return (req, res, next) => {
-    const key = req.ip || req.connection.remoteAddress;
+    const key = req.ip || req.connection.remoteAddress || 'unknown';
     const now = Date.now();
     const windowStart = now - windowMs;
     
@@ -133,6 +187,7 @@ const createRateLimit = (windowMs, max, message) => {
 module.exports = {
   authenticateToken,
   requireAdmin,
+  authorize, // Keep for backward compatibility
   logActivity,
   createRateLimit
 };
