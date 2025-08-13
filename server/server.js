@@ -1,105 +1,111 @@
 // server.js
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const compression = require('compression');
-const http = require('http');
-
+require("dotenv").config();
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const helmet = require("helmet");
+const morgan = require("morgan");
+const compression = require("compression");
+const http = require("http");
 
 // Import routes and services
-const authRoutes = require('./routes/auth.routes');
-const dashboardRoutes = require('./routes/dashboard.routes');
+const authRoutes = require("./routes/auth.routes");
+const dashboardRoutes = require("./routes/dashboard.routes");
 const contentRoutes = require("./routes/content.routes");
-const userRoutes = require('./routes/user.routes');
-const analyticsDataRoutes = require('./routes/analyticsData.routes');
-const WebSocketService = require('./services/websocketService');
-const { createRateLimit } = require('./middlewares/auth.middleware');
+const userRoutes = require("./routes/user.routes");
+const analyticsDataRoutes = require("./routes/analyticsData.routes");
+const WebSocketService = require("./services/websocketService");
+const { createRateLimit } = require("./middlewares/auth.middleware");
 
 const app = express();
 const server = http.createServer(app);
 
 // Security middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "ws:", "wss:"],
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: ["'self'", "ws:", "wss:"],
+      },
     },
-  },
-  crossOriginEmbedderPolicy: false
-}));
+    crossOriginEmbedderPolicy: false,
+  })
+);
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL] 
-    : ['http://localhost:3000', 'http://localhost:5173'],
+  origin:
+    process.env.NODE_ENV === "production"
+      ? [process.env.FRONTEND_URL]
+      : [
+          "http://localhost:3000",
+          "http://localhost:5173",
+          "http://localhost:5174",
+        ],
   credentials: true,
   optionsSuccessStatus: 200,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
 };
 
 app.use(cors(corsOptions));
 app.use(compression());
-app.use(morgan('combined'));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(morgan("combined"));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Trust proxy for accurate IP addresses
-app.set('trust proxy', 1);
+app.set("trust proxy", 1);
 
 // Global rate limiting
 const globalRateLimit = createRateLimit(
   15 * 60 * 1000, // 15 minutes
   1000, // 100 requests per window
-  'Too many requests from this IP'
+  "Too many requests from this IP"
 );
-app.use('/api', globalRateLimit);
+app.use("/api", globalRateLimit);
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get("/health", (req, res) => {
   res.json({
-    status: 'healthy',
+    status: "healthy",
     timestamp: new Date(),
     uptime: process.uptime(),
-    version: process.env.npm_package_version || '1.0.0'
+    version: process.env.npm_package_version || "1.0.0",
   });
 });
 
 // API routes
-app.use('/api/auth', authRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/analytics-data', analyticsDataRoutes);
-app.use('/api/content', contentRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/analytics-data", analyticsDataRoutes);
+app.use("/api/content", contentRoutes);
 
 // 404 handler
-app.use('*', (req, res) => {
+app.use("*", (req, res) => {
   res.status(404).json({
     success: false,
-    message: 'Route not found',
-    path: req.originalUrl
+    message: "Route not found",
+    path: req.originalUrl,
   });
 });
 
 // Global error handler
 app.use((error, req, res, next) => {
-  console.error('Global error handler:', error);
-  
+  console.error("Global error handler:", error);
+
   res.status(error.status || 500).json({
     success: false,
-    message: error.message || 'Internal server error',
-    ...(process.env.NODE_ENV === 'development' && { 
+    message: error.message || "Internal server error",
+    ...(process.env.NODE_ENV === "development" && {
       stack: error.stack,
-      details: error 
-    })
+      details: error,
+    }),
   });
 });
 
@@ -115,22 +121,21 @@ const connectDB = async () => {
     });
 
     console.log(`MongoDB Connected: ${conn.connection.host}`);
-    
+
     // Handle connection events
-    mongoose.connection.on('error', err => {
-      console.error('MongoDB connection error:', err);
+    mongoose.connection.on("error", (err) => {
+      console.error("MongoDB connection error:", err);
     });
 
-    mongoose.connection.on('disconnected', () => {
-      console.log('MongoDB disconnected');
+    mongoose.connection.on("disconnected", () => {
+      console.log("MongoDB disconnected");
     });
 
-    mongoose.connection.on('reconnected', () => {
-      console.log('MongoDB reconnected');
+    mongoose.connection.on("reconnected", () => {
+      console.log("MongoDB reconnected");
     });
-
   } catch (error) {
-    console.error('Database connection failed:', error);
+    console.error("Database connection failed:", error);
     process.exit(1);
   }
 };
@@ -142,9 +147,9 @@ let wsService;
 const startServer = async () => {
   try {
     await connectDB();
-    
+
     const PORT = process.env.PORT || 5000;
-    
+
     server.listen(PORT, () => {
       console.log(`
 🚀 Server running on port ${PORT}
@@ -153,14 +158,13 @@ const startServer = async () => {
 🌐 WebSocket available at ws://localhost:${PORT}/ws
 📈 Health check: http://localhost:${PORT}/health
       `);
-      
+
       // Initialize WebSocket service after server starts
       wsService = new WebSocketService(server);
-      console.log('✅ WebSocket service initialized');
+      console.log("✅ WebSocket service initialized");
     });
-
   } catch (error) {
-    console.error('Failed to start server:', error);
+    console.error("Failed to start server:", error);
     process.exit(1);
   }
 };
@@ -168,41 +172,43 @@ const startServer = async () => {
 // Graceful shutdown
 const gracefulShutdown = (signal) => {
   console.log(`\n${signal} received. Starting graceful shutdown...`);
-  
+
   server.close(async () => {
-    console.log('HTTP server closed');
-    
+    console.log("HTTP server closed");
+
     try {
       await mongoose.connection.close();
-      console.log('MongoDB connection closed');
-      console.log('Graceful shutdown completed');
+      console.log("MongoDB connection closed");
+      console.log("Graceful shutdown completed");
       process.exit(0);
     } catch (error) {
-      console.error('Error during shutdown:', error);
+      console.error("Error during shutdown:", error);
       process.exit(1);
     }
   });
 
   // Force close after 30 seconds
   setTimeout(() => {
-    console.error('Could not close connections in time, forcefully shutting down');
+    console.error(
+      "Could not close connections in time, forcefully shutting down"
+    );
     process.exit(1);
   }, 30000);
 };
 
 // Handle shutdown signals
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 
 // Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
-  console.error('Uncaught Exception:', error);
-  gracefulShutdown('UNCAUGHT_EXCEPTION');
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
+  gracefulShutdown("UNCAUGHT_EXCEPTION");
 });
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  gracefulShutdown('UNHANDLED_REJECTION');
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  gracefulShutdown("UNHANDLED_REJECTION");
 });
 
 // Start the server
