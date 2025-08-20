@@ -16,17 +16,19 @@ import { BASE_URL } from "../../utils/constant";
 import axios from "axios";
 
 const Sidebar = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
   // Check screen size
   useEffect(() => {
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 1024);
+      // Close sidebar when switching to desktop
+      if (window.innerWidth >= 1024) {
+        setIsOpen(false);
+      }
     };
     
     checkScreenSize();
@@ -52,21 +54,6 @@ const Sidebar = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isMobile, isOpen]);
-
-  // Check if screen is mobile
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 1024);
-      // Close mobile menu when switching to desktop
-      if (window.innerWidth >= 1024) {
-        setIsMobileMenuOpen(false);
-      }
-    };
-
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
 
   const handleLogout = async () => {
     try {
@@ -121,14 +108,8 @@ const Sidebar = () => {
 
   const handleNavigation = (path) => {
     navigate(path);
-<<<<<<< HEAD
-    // Close mobile menu after navigation
-    if (isMobile) {
-      setIsMobileMenuOpen(false);
-=======
     if (isMobile) {
       setIsOpen(false);
->>>>>>> b4251fc (made it responsive)
     }
   };
 
@@ -136,70 +117,12 @@ const Sidebar = () => {
     return location.pathname === path;
   };
 
-<<<<<<< HEAD
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-=======
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
->>>>>>> b4251fc (made it responsive)
   };
 
   return (
     <>
-<<<<<<< HEAD
-      {/* Mobile Header with Menu Toggle */}
-      {isMobile && (
-        <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-[#1a1a1a] border-b border-white/10 flex items-center px-4 z-50">
-          <button
-            onClick={toggleMobileMenu}
-            className="p-2 text-white rounded-lg hover:bg-white/10 transition-colors"
-          >
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-          <div className="flex items-center gap-3 ml-4">
-            <div className="w-8 h-8 bg-[#e3dddc] rounded-lg flex items-center justify-center">
-              <BarChart3 className="w-5 h-5 text-black" />
-            </div>
-            <span className="text-white text-xl font-bold">AdminCore</span>
-          </div>
-        </div>
-      )}
-
-      {/* Mobile Backdrop */}
-      {isMobile && isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <div className={`
-        bg-[#1a1a1a] border-r border-white/10 z-40 flex flex-col
-        ${isMobile 
-          ? `fixed top-16 left-0 bottom-0 w-72 transform transition-transform duration-300 ease-in-out ${
-              isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-            }`
-          : 'fixed top-0 left-0 h-screen w-64'
-        }
-      `}>
-        {/* Desktop Logo */}
-        {!isMobile && (
-          <div className="p-6 border-b border-white/10 flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-[#e3dddc] rounded-lg flex items-center justify-center">
-                <BarChart3 className="w-5 h-5 text-black" />
-              </div>
-              <span className="text-white text-xl font-bold">AdminCore</span>
-            </div>
-          </div>
-        )}
-
-        {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-=======
-      
       {/* Mobile Menu Button - ONLY for mobile screens */}
       {isMobile && (
         <button
@@ -243,7 +166,6 @@ const Sidebar = () => {
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-1 sm:space-y-2">
->>>>>>> b4251fc (made it responsive)
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = isActiveRoute(item.path);
@@ -251,19 +173,6 @@ const Sidebar = () => {
               <button
                 key={item.id}
                 onClick={() => handleNavigation(item.path)}
-<<<<<<< HEAD
-                className={`
-                  w-full flex items-center gap-3 p-3 rounded-lg text-left 
-                  transition-all duration-200 group
-                  ${isActive
-                    ? "bg-white/10 text-white border border-white/20"
-                    : "text-gray-400 hover:bg-white/5 hover:text-white"
-                  }
-                `}
-              >
-                <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-white'}`} />
-                <span className="font-medium">{item.label}</span>
-=======
                 className={`w-full flex items-center gap-3 p-2.5 sm:p-3 rounded-lg text-left transition-all duration-200 group ${
                   isActive
                     ? "border border-gray-300 text-white bg-white/5"
@@ -272,23 +181,12 @@ const Sidebar = () => {
               >
                 <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                 <span className="font-medium text-sm sm:text-base truncate">{item.label}</span>
->>>>>>> b4251fc (made it responsive)
               </button>
             );
           })}
         </nav>
 
         {/* Logout Button */}
-<<<<<<< HEAD
-        <div className="p-4 border-t border-white/10 flex-shrink-0">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all duration-200 text-red-400 hover:bg-red-500/10 hover:text-red-300 group"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-5 h-5 flex-shrink-0"
-=======
         <div className="flex-shrink-0 p-3 sm:p-4 border-t border-white/10">
           <button
             onClick={handleLogout}
@@ -297,7 +195,6 @@ const Sidebar = () => {
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
->>>>>>> b4251fc (made it responsive)
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -306,17 +203,10 @@ const Sidebar = () => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
-<<<<<<< HEAD
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 002 2h4a2 2 0 002-2v-1m-8 0v-1a2 2 0 00-2-2H3a2 2 0 00-2-2v1"
-              />
-            </svg>
-            <span className="font-medium">Logout</span>
-=======
                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 002 2h4a2 2 0 002-2v1m-8 0v-1a2 2 0 00-2-2H3a2 2 0 00-2 2v1"
               />
             </svg>
             <span className="font-medium text-sm sm:text-base truncate">Logout</span>
->>>>>>> b4251fc (made it responsive)
           </button>
         </div>
       </div>
