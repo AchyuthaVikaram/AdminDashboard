@@ -36,7 +36,6 @@ const SystemStatusWidget = ({data}) => {
       setLastUpdated(new Date());
     } catch (error) {
       console.error('Error fetching system health:', error);
-      // Fallback data
       setSystemHealth([
         { name: 'Healthy', value: 80 },
         { name: 'Warnings', value: 15 },
@@ -51,7 +50,6 @@ const SystemStatusWidget = ({data}) => {
     if (healthData && healthData.health) {
       setSystemHealth(healthData.health);
     } else {
-      // Process from services data if available
       if (healthData && healthData.services) {
         const services = healthData.services;
         const serviceStatuses = Object.values(services);
@@ -94,28 +92,68 @@ const SystemStatusWidget = ({data}) => {
     setLoading(true);
     fetchSystemHealth();
   };
-  return (
-    <div className="bg-[#1a1a1a] p-6 rounded-xl border border-white/10 shadow-md space-y-4">
-      <h2 className="text-xl font-semibold text-white">System Health</h2>
 
-      <ResponsiveContainer width="100%" height={220}>
-        <PieChart>
-          <Pie
-            data={systemHealth}
-            cx="50%"
-            cy="50%"
-            outerRadius={70}
-            label
-            dataKey="value"
-          >
-            {systemHealth.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index]} stroke="#222" />
-            ))}
-          </Pie>
-          <Tooltip />
-          <Legend iconType="circle" layout="horizontal" verticalAlign="bottom" align="center" />
-        </PieChart>
-      </ResponsiveContainer>
+  return (
+    <div className="bg-[#1a1a1a] p-4 sm:p-6 rounded-xl border border-white/10 shadow-md space-y-3 sm:space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-lg sm:text-xl font-semibold text-white">System Health</h2>
+        <button
+          onClick={refreshHealth}
+          disabled={loading}
+          className="text-xs sm:text-sm text-[#00FFFF] hover:text-[#39FF14] transition-colors disabled:opacity-50"
+        >
+          {loading ? 'Loading...' : 'Refresh'}
+        </button>
+      </div>
+
+      <div className="h-48 sm:h-56 lg:h-[220px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={systemHealth}
+              cx="50%"
+              cy="50%"
+              outerRadius="60%"
+              label={(entry) => `${entry.value}%`}
+              labelStyle={{ 
+                fontSize: '12px', 
+                fill: '#fff',
+                fontWeight: 'bold'
+              }}
+              dataKey="value"
+            >
+              {systemHealth.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index]} stroke="#222" strokeWidth={1} />
+              ))}
+            </Pie>
+            <Tooltip 
+              contentStyle={{
+                backgroundColor: "#1a1a1a",
+                border: "1px solid #333",
+                borderRadius: "8px",
+                color: "#fff",
+                fontSize: "12px"
+              }}
+            />
+            <Legend 
+              iconType="circle" 
+              layout="horizontal" 
+              verticalAlign="bottom" 
+              align="center"
+              wrapperStyle={{
+                fontSize: '12px',
+                color: '#fff'
+              }}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+
+      {lastUpdated && (
+        <div className="text-xs text-white/50 text-center">
+          Last updated: {lastUpdated.toLocaleTimeString()}
+        </div>
+      )}
     </div>
   );
 };

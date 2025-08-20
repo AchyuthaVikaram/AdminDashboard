@@ -47,7 +47,7 @@ const SystemPerformanceChart = () => {
     <div className="bg-white/5 backdrop-blur-md p-6 rounded-2xl shadow-lg border border-white/10">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-bold text-white">System Performance Metrics</h3>
-        <div className="w-6 h-6 bg-gradient-to-r from-[#00FFFF] to-[#39FF14] rounded-full flex items-center justify-center">
+        <div className="w-6 h-6 bg-gradient-to-r from-[#00FF7F] to-[#FFD700] rounded-full flex items-center justify-center">
           <div className="w-2 h-2 bg-black rounded-full"></div>
         </div>
       </div>
@@ -71,26 +71,26 @@ const SystemPerformanceChart = () => {
             <Line 
               type="monotone" 
               dataKey="CPU" 
-              stroke="#00FFFF" 
+              stroke="#00FF7F" 
               strokeWidth={3}
-              dot={{ fill: '#00FFFF', strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6, stroke: '#00FFFF', strokeWidth: 2 }}
+              dot={{ fill: '#00FF7F', strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6, stroke: '#00FF7F', strokeWidth: 2 }}
             />
             <Line 
               type="monotone" 
               dataKey="Memory" 
-              stroke="#39FF14" 
+              stroke="#FFD700" 
               strokeWidth={3}
-              dot={{ fill: '#39FF14', strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6, stroke: '#39FF14', strokeWidth: 2 }}
+              dot={{ fill: '#FFD700', strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6, stroke: '#FFD700', strokeWidth: 2 }}
             />
             <Line 
               type="monotone" 
               dataKey="Network" 
-              stroke="#FF1493" 
+              stroke="#FF4C4C" 
               strokeWidth={3}
-              dot={{ fill: '#FF1493', strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6, stroke: '#FF1493', strokeWidth: 2 }}
+              dot={{ fill: '#FF4C4C', strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6, stroke: '#FF4C4C', strokeWidth: 2 }}
             />
           </LineChart>
         </ResponsiveContainer>

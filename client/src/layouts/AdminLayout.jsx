@@ -11,15 +11,6 @@ const AdminLayout = () => {
       <Sidebar isOpen={sidebarOpen} toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
       <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0" : "ml-0 md:ml-[20%]"}`}>
-        {/* Toggle on Mobile */}
-        <div className="md:hidden p-4">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="bg-[#1a1a1a] text-white px-4 py-2 rounded-md"
-          >
-            ☰ Menu
-          </button>
-        </div>
 
         <div className="p-6 space-y-6">
           

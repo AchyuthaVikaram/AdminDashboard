@@ -1,3 +1,4 @@
+// File: /src/pages/Analytics.jsx
 import StatsCards from "../components/ui/StatsCards";
 import ContentPerformanceChart from "../components/ui/ContentPerformanceChart";
 import UserDistributionChart from "../components/ui/UserDistributionChart";
@@ -221,15 +222,15 @@ const Analytics = () => {
   // Don't render anything until auth check is complete
   if (!isInitialized) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#121212]">
+      <div className="min-h-screen flex items-center justify-center bg-[#121212] px-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
           className="text-center"
         >
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00FFFF] mx-auto mb-4"></div>
-          <div className="text-white text-xl">Checking authentication...</div>
+          <div className="animate-spin rounded-full h-16 w-16 sm:h-24 sm:w-24 md:h-32 md:w-32 border-b-2 border-[#00FFFF] mx-auto mb-4"></div>
+          <div className="text-white text-lg sm:text-xl">Checking authentication...</div>
         </motion.div>
       </div>
     );
@@ -237,15 +238,15 @@ const Analytics = () => {
 
   if (loading && !analyticsData) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#121212]">
+      <div className="min-h-screen flex items-center justify-center bg-[#121212] px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center"
         >
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00FFFF] mx-auto mb-4"></div>
-          <div className="text-white text-xl">Loading analytics...</div>
+          <div className="animate-spin rounded-full h-16 w-16 sm:h-24 sm:w-24 md:h-32 md:w-32 border-b-2 border-[#00FFFF] mx-auto mb-4"></div>
+          <div className="text-white text-lg sm:text-xl">Loading analytics...</div>
           <div className="text-white/60 text-sm mt-2">
             Fetching real-time data...
           </div>
@@ -261,7 +262,7 @@ const Analytics = () => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="space-y-6 relative"
+        className="space-y-4 sm:space-y-6 relative p-4 sm:p-6"
       >
         {/* ADDED: Motion wrapper for TopBar */}
         <motion.div
@@ -288,12 +289,13 @@ const Analytics = () => {
         >
           <StatsCards data={analyticsData?.stats} loading={loading} />
         </motion.div>
+        
         {/* Charts Grid */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+          className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6"
         >
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -329,22 +331,22 @@ const Analytics = () => {
           />
         </motion.div>
 
-        {/* Real-time indicator */}
-        {/* {analyticsData && (
+        {/* Real-time indicator - Made responsive */}
+        {analyticsData && (
           <motion.div
             initial={{ opacity: 0, scale: 0.8, x: 20 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
             transition={{ duration: 0.4, delay: 0.8 }}
-            className="fixed bottom-4 right-4 bg-white/5 backdrop-blur-md p-3 rounded-lg border border-white/10 z-40"
+            className="fixed bottom-4 right-4 bg-white/5 backdrop-blur-md p-2 sm:p-3 rounded-lg border border-white/10 z-40 max-w-[200px] sm:max-w-none"
           >
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-white/70 text-sm">
-                Live • Last updated: {lastUpdated?.toLocaleTimeString()}
+              <span className="text-white/70 text-xs sm:text-sm truncate">
+                Live • {lastUpdated?.toLocaleTimeString()}
               </span>
             </div>
           </motion.div>
-        )} */}
+        )}
       </motion.div>
     </AnimatePresence>
   );
