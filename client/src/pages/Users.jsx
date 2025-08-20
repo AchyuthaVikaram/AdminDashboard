@@ -14,6 +14,14 @@ import {
   Trash2,
   RefreshCw,
   AlertTriangle,
+  X,
+  Save,
+  User as UserIcon,
+  Mail,
+  Calendar,
+  Globe,
+  Monitor,
+  Clock,
 } from "lucide-react";
 import { BASE_URL } from "../utils/constant";
 
@@ -28,6 +36,614 @@ axios.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Modal Backdrop Component
+const ModalBackdrop = ({ children, onClose }) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+    onClick={onClose}
+  >
+    <motion.div
+      initial={{ scale: 0.9, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ scale: 0.9, opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="bg-gray-800 rounded-xl border border-gray-700 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {children}
+    </motion.div>
+  </motion.div>
+);
+
+// View User Modal
+const ViewUserModal = ({ user, onClose }) => {
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getRoleColor = (role) => {
+    switch (role) {
+      case "Admin":
+        return "bg-purple-500/20 text-purple-400 border-purple-500/30";
+      case "User":
+        return "bg-cyan-500/20 text-cyan-400 border-cyan-500/30";
+      default:
+        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Active":
+        return "bg-green-500/20 text-green-400 border-green-500/30";
+      case "Inactive":
+        return "bg-red-500/20 text-red-400 border-red-500/30";
+      case "Suspended":
+        return "bg-orange-500/20 text-orange-400 border-orange-500/30";
+      default:
+        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+    }
+  };
+
+  return (
+    <ModalBackdrop onClose={onClose}>
+      <div className="p-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-white">User Details</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* User Info */}
+        <div className="space-y-6">
+          {/* Profile Section */}
+          <div className="flex items-center space-x-4 p-4 bg-gray-700/50 rounded-lg">
+            <img
+              src={user.avatar}
+              alt={user.name}
+              className="w-16 h-16 rounded-full object-cover"
+              onError={(e) => {
+                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=6366f1&color=fff`;
+              }}
+            />
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-white">{user.name}</h3>
+              <p className="text-gray-400">{user.email}</p>
+              <p className="text-gray-500 text-sm">@{user.username}</p>
+            </div>
+            <div className="flex space-x-2">
+              <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getRoleColor(user.role)}`}>
+                {user.role}
+              </span>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(user.status)}`}>
+                {user.status}
+              </span>
+            </div>
+          </div>
+
+          {/* Details Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-gray-700/30 rounded-lg p-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <UserIcon className="w-4 h-4 text-cyan-400" />
+                <span className="text-gray-400 text-sm">User ID</span>
+              </div>
+              <p className="text-white font-medium">{user.id}</p>
+            </div>
+
+            <div className="bg-gray-700/30 rounded-lg p-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <Clock className="w-4 h-4 text-green-400" />
+                <span className="text-gray-400 text-sm">Last Active</span>
+              </div>
+              <p className="text-white font-medium">{user.lastActive}</p>
+            </div>
+
+            <div className="bg-gray-700/30 rounded-lg p-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <Calendar className="w-4 h-4 text-purple-400" />
+                <span className="text-gray-400 text-sm">Joined</span>
+              </div>
+              <p className="text-white font-medium">
+                {user.createdAt ? formatDate(user.createdAt) : 'N/A'}
+              </p>
+            </div>
+
+            <div className="bg-gray-700/30 rounded-lg p-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <Monitor className="w-4 h-4 text-orange-400" />
+                <span className="text-gray-400 text-sm">Device</span>
+              </div>
+              <p className="text-white font-medium">
+                {user.deviceInfo?.browser || 'Unknown'}
+              </p>
+            </div>
+          </div>
+
+          {/* Additional Info */}
+          {user.metadata && (
+            <div className="bg-gray-700/30 rounded-lg p-4">
+              <h4 className="text-white font-medium mb-3">Activity Statistics</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-gray-400">Login Count:</span>
+                  <span className="text-white ml-2">{user.loginCount || 0}</span>
+                </div>
+                <div>
+                  <span className="text-gray-400">Total Sessions:</span>
+                  <span className="text-white ml-2">{user.metadata.totalSessions || 0}</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Close Button */}
+        <div className="flex justify-end mt-6 pt-4 border-t border-gray-700">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onClose}
+            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            Close
+          </motion.button>
+        </div>
+      </div>
+    </ModalBackdrop>
+  );
+};
+
+// Edit User Modal
+const EditUserModal = ({ user, onClose, onSave }) => {
+  const [formData, setFormData] = useState({
+    name: user.name || '',
+    email: user.email || '',
+    username: user.username || '',
+    role: user.role || 'User',
+    status: user.status || 'Active'
+  });
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.name.trim()) newErrors.name = 'Name is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    if (!formData.username.trim()) newErrors.username = 'Username is required';
+    if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Invalid email format';
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    setLoading(true);
+    try {
+      const success = await onSave(formData);
+      if (success) {
+        onClose();
+      }
+    } catch (error) {
+      console.error('Error saving user:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  return (
+    <ModalBackdrop onClose={onClose}>
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-white">Edit User</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Name */}
+          <div>
+            <label className="block text-gray-300 text-sm font-medium mb-2">
+              Full Name
+            </label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => handleChange('name', e.target.value)}
+              className={`w-full bg-gray-700 border ${errors.name ? 'border-red-500' : 'border-gray-600'} rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500`}
+              placeholder="Enter full name"
+            />
+            {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="block text-gray-300 text-sm font-medium mb-2">
+              Email Address
+            </label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => handleChange('email', e.target.value)}
+              className={`w-full bg-gray-700 border ${errors.email ? 'border-red-500' : 'border-gray-600'} rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500`}
+              placeholder="Enter email address"
+            />
+            {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
+          </div>
+
+          {/* Username */}
+          <div>
+            <label className="block text-gray-300 text-sm font-medium mb-2">
+              Username
+            </label>
+            <input
+              type="text"
+              value={formData.username}
+              onChange={(e) => handleChange('username', e.target.value)}
+              className={`w-full bg-gray-700 border ${errors.username ? 'border-red-500' : 'border-gray-600'} rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500`}
+              placeholder="Enter username"
+            />
+            {errors.username && <p className="text-red-400 text-xs mt-1">{errors.username}</p>}
+          </div>
+
+          {/* Role and Status */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-gray-300 text-sm font-medium mb-2">
+                Role
+              </label>
+              <select
+                value={formData.role}
+                onChange={(e) => handleChange('role', e.target.value)}
+                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
+              >
+                <option value="User">User</option>
+                <option value="Admin">Admin</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-gray-300 text-sm font-medium mb-2">
+                Status
+              </label>
+              <select
+                value={formData.status}
+                onChange={(e) => handleChange('status', e.target.value)}
+                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="Suspended">Suspended</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              type="button"
+              onClick={onClose}
+              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              Cancel
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              type="submit"
+              disabled={loading}
+              className="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors disabled:opacity-50"
+            >
+              {loading ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              <span>{loading ? 'Saving...' : 'Save Changes'}</span>
+            </motion.button>
+          </div>
+        </form>
+      </div>
+    </ModalBackdrop>
+  );
+};
+
+// Create User Modal
+const CreateUserModal = ({ onClose, onSave }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    username: '',
+    password: '',
+    role: 'User',
+    status: 'Active'
+  });
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.name.trim()) newErrors.name = 'Name is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    if (!formData.username.trim()) newErrors.username = 'Username is required';
+    if (!formData.password.trim()) newErrors.password = 'Password is required';
+    if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Invalid email format';
+    if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    setLoading(true);
+    try {
+      const success = await onSave(formData);
+      if (success) {
+        onClose();
+      }
+    } catch (error) {
+      console.error('Error creating user:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  return (
+    <ModalBackdrop onClose={onClose}>
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-white">Create New User</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Name */}
+          <div>
+            <label className="block text-gray-300 text-sm font-medium mb-2">
+              Full Name *
+            </label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => handleChange('name', e.target.value)}
+              className={`w-full bg-gray-700 border ${errors.name ? 'border-red-500' : 'border-gray-600'} rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500`}
+              placeholder="Enter full name"
+            />
+            {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="block text-gray-300 text-sm font-medium mb-2">
+              Email Address *
+            </label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => handleChange('email', e.target.value)}
+              className={`w-full bg-gray-700 border ${errors.email ? 'border-red-500' : 'border-gray-600'} rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500`}
+              placeholder="Enter email address"
+            />
+            {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
+          </div>
+
+          {/* Username */}
+          <div>
+            <label className="block text-gray-300 text-sm font-medium mb-2">
+              Username *
+            </label>
+            <input
+              type="text"
+              value={formData.username}
+              onChange={(e) => handleChange('username', e.target.value)}
+              className={`w-full bg-gray-700 border ${errors.username ? 'border-red-500' : 'border-gray-600'} rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500`}
+              placeholder="Enter username"
+            />
+            {errors.username && <p className="text-red-400 text-xs mt-1">{errors.username}</p>}
+          </div>
+
+          {/* Password */}
+          <div>
+            <label className="block text-gray-300 text-sm font-medium mb-2">
+              Password *
+            </label>
+            <input
+              type="password"
+              value={formData.password}
+              onChange={(e) => handleChange('password', e.target.value)}
+              className={`w-full bg-gray-700 border ${errors.password ? 'border-red-500' : 'border-gray-600'} rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500`}
+              placeholder="Enter password (min 6 characters)"
+            />
+            {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password}</p>}
+          </div>
+
+          {/* Role and Status */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-gray-300 text-sm font-medium mb-2">
+                Role
+              </label>
+              <select
+                value={formData.role}
+                onChange={(e) => handleChange('role', e.target.value)}
+                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
+              >
+                <option value="User">User</option>
+                <option value="Admin">Admin</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-gray-300 text-sm font-medium mb-2">
+                Status
+              </label>
+              <select
+                value={formData.status}
+                onChange={(e) => handleChange('status', e.target.value)}
+                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="Suspended">Suspended</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              type="button"
+              onClick={onClose}
+              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              Cancel
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              type="submit"
+              disabled={loading}
+              className="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors disabled:opacity-50"
+            >
+              {loading ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              <span>{loading ? 'Creating...' : 'Create User'}</span>
+            </motion.button>
+          </div>
+        </form>
+      </div>
+    </ModalBackdrop>
+  );
+};
+
+// Delete Confirmation Modal
+const DeleteConfirmModal = ({ user, onClose, onConfirm }) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleConfirm = async () => {
+    setLoading(true);
+    try {
+      const success = await onConfirm();
+      if (success) {
+        onClose();
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <ModalBackdrop onClose={onClose}>
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-white">Delete User</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="mb-6">
+          <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 mb-4">
+            <div className="flex items-center space-x-3">
+              <AlertTriangle className="w-5 h-5 text-red-400" />
+              <span className="text-red-200">This action cannot be undone</span>
+            </div>
+          </div>
+
+          <p className="text-gray-300">
+            Are you sure you want to delete the user{" "}
+            <span className="font-semibold text-white">{user.name}</span>?
+          </p>
+          <p className="text-gray-400 text-sm mt-2">
+            Email: {user.email}
+          </p>
+        </div>
+
+        <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            type="button"
+            onClick={onClose}
+            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            Cancel
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleConfirm}
+            disabled={loading}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors disabled:opacity-50"
+          >
+            {loading ? (
+              <RefreshCw className="w-4 h-4 animate-spin" />
+            ) : (
+              <Trash2 className="w-4 h-4" />
+            )}
+            <span>{loading ? 'Deleting...' : 'Delete User'}</span>
+          </motion.button>
+        </div>
+      </div>
+    </ModalBackdrop>
+  );
+};
 
 // Stats Card Component
 const StatsCard = ({ title, value, icon: Icon, color, delay, loading }) => (
@@ -339,6 +955,14 @@ const AdminUsersPage = () => {
   const [pagination, setPagination] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Modal states
+  const [modals, setModals] = useState({
+    view: { isOpen: false, user: null },
+    edit: { isOpen: false, user: null },
+    create: { isOpen: false },
+    delete: { isOpen: false, user: null }
+  });
+
   const usersPerPage = 5;
 
   // API Functions
@@ -385,15 +1009,83 @@ const AdminUsersPage = () => {
     }
   };
 
+  const fetchUserById = async (userId) => {
+    try {
+      const response = await axios.get(`/users/${userId}`);
+      if (response.data.success) {
+        return response.data.data;
+      }
+      throw new Error(response.data.message || 'Failed to fetch user details');
+    } catch (err) {
+      console.error('Fetch user by ID error:', err);
+      setError(err.response?.data?.message || 'Failed to fetch user details');
+      return null;
+    }
+  };
+
+  const createUser = async (userData) => {
+    try {
+      const response = await axios.post('/users', userData);
+      if (response.data.success) {
+        // Refresh current page and stats
+        await Promise.all([
+          fetchUsers(currentPage, searchTerm, roleFilter, statusFilter),
+          fetchStats()
+        ]);
+        return true;
+      }
+      throw new Error(response.data.message || 'Failed to create user');
+    } catch (err) {
+      console.error('Create user error:', err);
+      setError(err.response?.data?.message || 'Failed to create user');
+      return false;
+    }
+  };
+
+  const updateUser = async (userId, userData) => {
+    try {
+      const response = await axios.put(`/users/${userId}`, userData);
+      if (response.data.success) {
+        // Update users state optimistically
+        setUsers(prevUsers => 
+          prevUsers.map(user => 
+            (user._id === userId || user.id === userId) 
+              ? { ...user, ...userData, lastActive: response.data.data.lastActive }
+              : user
+          )
+        );
+        // Refresh stats
+        await fetchStats();
+        return true;
+      }
+      throw new Error(response.data.message || 'Failed to update user');
+    } catch (err) {
+      console.error('Update user error:', err);
+      setError(err.response?.data?.message || 'Failed to update user');
+      return false;
+    }
+  };
+
   const deleteUser = async (userId) => {
     try {
       const response = await axios.delete(`/users/${userId}`);
       if (response.data.success) {
-        // Refresh current page
-        await fetchUsers(currentPage, searchTerm, roleFilter, statusFilter);
+        // Remove user from state optimistically
+        setUsers(prevUsers => 
+          prevUsers.filter(user => user._id !== userId && user.id !== userId)
+        );
+        // If current page becomes empty, go to previous page
+        if (users.length === 1 && currentPage > 1) {
+          setCurrentPage(currentPage - 1);
+          await fetchUsers(currentPage - 1, searchTerm, roleFilter, statusFilter);
+        } else {
+          await fetchUsers(currentPage, searchTerm, roleFilter, statusFilter);
+        }
+        // Refresh stats
         await fetchStats();
         return true;
       }
+      throw new Error(response.data.message || 'Failed to delete user');
     } catch (err) {
       console.error('Delete user error:', err);
       setError(err.response?.data?.message || 'Failed to delete user');
@@ -401,20 +1093,38 @@ const AdminUsersPage = () => {
     }
   };
 
-  const toggleUserStatus = async (userId) => {
-    try {
-      const response = await axios.patch(`/users/${userId}/toggle-status`);
-      if (response.data.success) {
-        // Refresh current page
-        await fetchUsers(currentPage, searchTerm, roleFilter, statusFilter);
-        await fetchStats();
-        return true;
-      }
-    } catch (err) {
-      console.error('Toggle user status error:', err);
-      setError(err.response?.data?.message || 'Failed to update user status');
-      return false;
+  // Modal handlers
+  const openModal = (type, user = null) => {
+    setModals(prev => ({
+      ...prev,
+      [type]: { isOpen: true, user }
+    }));
+  };
+
+  const closeModal = (type) => {
+    setModals(prev => ({
+      ...prev,
+      [type]: { isOpen: false, user: null }
+    }));
+  };
+
+  const handleViewUser = async (user) => {
+    const userDetails = await fetchUserById(user._id || user.id);
+    if (userDetails) {
+      openModal('view', userDetails);
     }
+  };
+
+  const handleEditUser = (user) => {
+    openModal('edit', user);
+  };
+
+  const handleDeleteUser = (user) => {
+    openModal('delete', user);
+  };
+
+  const handleCreateUser = () => {
+    openModal('create');
   };
 
   // Effect hooks
@@ -462,71 +1172,19 @@ const AdminUsersPage = () => {
 
   // Handle user actions
   const handleAction = async (action, user) => {
-    console.log(`${action} user:`, user);
-    
     switch (action) {
       case "view":
-        // Implement view user details
-        alert(`Viewing user: ${user.name}\nEmail: ${user.email}\nRole: ${user.role}\nStatus: ${user.status}`);
+        await handleViewUser(user);
         break;
-        
       case "edit":
-        // Implement edit user (could open a modal)
-        const newRole = user.role === "Admin" ? "User" : "Admin";
-        if (confirm(`Change ${user.name}'s role from ${user.role} to ${newRole}?`)) {
-          try {
-            const response = await axios.put(`/users/${user.id || user._id}`, {
-              role: newRole
-            });
-            if (response.data.success) {
-              await fetchUsers(currentPage, searchTerm, roleFilter, statusFilter);
-              await fetchStats();
-            }
-          } catch (err) {
-            setError(err.response?.data?.message || 'Failed to update user');
-          }
-        }
+        handleEditUser(user);
         break;
-        
       case "delete":
-        if (confirm(`Are you sure you want to delete ${user.name}?`)) {
-          await deleteUser(user.id || user._id);
-        }
+        handleDeleteUser(user);
         break;
-        
       default:
         console.log(`Unknown action: ${action}`);
     }
-  };
-
-  const handleAddUser = () => {
-    // Implement add user functionality
-    const name = prompt("Enter user name:");
-    if (!name) return;
-    
-    const email = prompt("Enter user email:");
-    if (!email) return;
-    
-    const username = prompt("Enter username:");
-    if (!username) return;
-
-    // Create user
-    axios.post('/users', {
-      name,
-      email,
-      username,
-      password: 'password123', // Default password
-      role: 'User',
-      status: 'Active'
-    }).then(response => {
-      if (response.data.success) {
-        fetchUsers(currentPage, searchTerm, roleFilter, statusFilter);
-        fetchStats();
-        alert('User created successfully!');
-      }
-    }).catch(err => {
-      setError(err.response?.data?.message || 'Failed to create user');
-    });
   };
 
   // Calculate totals for display
@@ -638,7 +1296,7 @@ const AdminUsersPage = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={handleAddUser}
+              onClick={handleCreateUser}
               className="bg-cyan-500 hover:bg-cyan-600 border border-gray-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
             >
               <Plus className="w-4 h-4" />
@@ -717,6 +1375,49 @@ const AdminUsersPage = () => {
             loading={loading}
           />
         </motion.div>
+
+        {/* Modals */}
+        <AnimatePresence>
+          {/* View User Modal */}
+          {modals.view.isOpen && modals.view.user && (
+            <ViewUserModal
+              user={modals.view.user}
+              onClose={() => closeModal('view')}
+            />
+          )}
+
+          {/* Edit User Modal */}
+          {modals.edit.isOpen && modals.edit.user && (
+            <EditUserModal
+              user={modals.edit.user}
+              onClose={() => closeModal('edit')}
+              onSave={async (userData) => {
+                const success = await updateUser(modals.edit.user._id || modals.edit.user.id, userData);
+                return success;
+              }}
+            />
+          )}
+
+          {/* Create User Modal */}
+          {modals.create.isOpen && (
+            <CreateUserModal
+              onClose={() => closeModal('create')}
+              onSave={createUser}
+            />
+          )}
+
+          {/* Delete Confirmation Modal */}
+          {modals.delete.isOpen && modals.delete.user && (
+            <DeleteConfirmModal
+              user={modals.delete.user}
+              onClose={() => closeModal('delete')}
+              onConfirm={async () => {
+                const success = await deleteUser(modals.delete.user._id || modals.delete.user.id);
+                return success;
+              }}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

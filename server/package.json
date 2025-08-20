@@ -11,7 +11,7 @@
     "lint": "eslint . --ext .js",
     "seed": "node scripts/seedingData.js",
     "seed-analytics": "node scripts/seedAnalyticsData.js",
-    "seed-users": "node scripts/seedUsersData.js"
+    "seed-users": "node scripts/seedUsersData.js",
     "seed-content": "node scripts/contentSeeder.js",
     "seed:content": "node -e \"require('./scripts/contentSeeder').seedContent().then(() => process.exit(0)).catch(err => { console.error(err); process.exit(1); })\"",
     "clear:content": "node -e \"require('./scripts/contentSeeder').clearContent().then(() => process.exit(0)).catch(err => { console.error(err); process.exit(1); })\"",

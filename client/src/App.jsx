@@ -16,6 +16,8 @@ import "react-toastify/dist/ReactToastify.css";
 import NotFound from "./pages/NotFound";
 import Analytics from "./pages/Analytics";
 import AdminLayout from "./layouts/AdminLayout";
+import AdminUsersPage from "./pages/Users";
+import AdminContentPage from "./pages/Content";
 
 function App() {
   const user = localStorage.getItem("user");
@@ -57,6 +59,8 @@ function App() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="system-logs" element={<SystemLogs />} />
+          <Route path="users" element={<AdminUsersPage />} />
+          <Route path="content" element={<AdminContentPage />} />
           <Route path="settings" element={<Settings />} />
           {/* You can add more nested admin routes like users, content etc */}
         </Route>
