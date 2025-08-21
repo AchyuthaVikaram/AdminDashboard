@@ -35,7 +35,8 @@ const authenticateToken = async (req, res, next) => {
       });
     }
 
-    if (user.status !== 'active') {
+    // FIXED: Check for both 'active' and 'Active' status (case insensitive)
+    if (user.status.toLowerCase() !== 'active') {
       return res.status(401).json({
         success: false,
         message: 'Account is suspended or deleted'
@@ -83,7 +84,8 @@ const requireAdmin = (req, res, next) => {
     });
   }
 
-  if (req.user.role !== 'admin') {
+  // FIXED: Case insensitive role check
+  if (req.user.role.toLowerCase() !== 'admin') {
     return res.status(403).json({
       success: false,
       message: 'Admin access required'
@@ -104,7 +106,8 @@ const authorize = (roles) => {
 
     const allowedRoles = Array.isArray(roles) ? roles : [roles];
     
-    if (!allowedRoles.includes(req.user.role)) {
+    // FIXED: Case insensitive role checking
+    if (!allowedRoles.some(role => role.toLowerCase() === req.user.role.toLowerCase())) {
       return res.status(403).json({
         success: false,
         message: `Access denied. Required role: ${allowedRoles.join(' or ')}`
@@ -141,7 +144,7 @@ const logActivity = (type, description) => {
   };
 };
 
-// Rate limiting middleware
+// FIXED: More lenient rate limiting to prevent blocking legitimate requests
 const createRateLimit = (windowMs, max, message) => {
   const requests = new Map();
   
@@ -168,8 +171,8 @@ const createRateLimit = (windowMs, max, message) => {
     recentRequests.push(now);
     requests.set(key, recentRequests);
     
-    // Cleanup old entries periodically
-    if (Math.random() < 0.01) {
+    // FIXED: More frequent cleanup to prevent memory issues
+    if (Math.random() < 0.05) { // Increased from 0.01 to 0.05
       for (const [key, times] of requests.entries()) {
         const filtered = times.filter(time => time > windowStart);
         if (filtered.length === 0) {

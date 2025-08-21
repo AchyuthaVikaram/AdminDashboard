@@ -5,14 +5,14 @@ const UsersController = require('../controllers/users.controller');
 const { authenticateToken, requireAdmin, createRateLimit } = require('../middlewares/auth.middleware');
 
 // Rate limiting for user operations
-const userRateLimit = createRateLimit(
-  15 * 60 * 1000, // 15 minutes
-  50, // 50 requests per window
-  'Too many user operations'
-);
+//const userRateLimit = createRateLimit(
+//  15 * 60 * 1000, // 15 minutes
+//  50, // 50 requests per window
+ // 'Too many user operations'
+//);
 
 // Apply rate limiting and authentication to all routes
-router.use(userRateLimit);
+//router.use(userRateLimit);
 router.use(authenticateToken);
 
 // Public routes (no admin required)

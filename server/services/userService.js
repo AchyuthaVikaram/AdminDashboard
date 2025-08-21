@@ -56,7 +56,7 @@ class UserService {
         totalUsers,
         activeUsers,
         adminUsers,
-        inactiveUsers: inactiveUsers + suspendedUsers, // Combine inactive and suspended
+        inactiveUsers: inactiveUsers + suspendedUsers, // Combine inactive and suspended for frontend display
         onlineUsers,
         todayRegistrations,
         thisWeekRegistrations,
@@ -206,12 +206,7 @@ class UserService {
   async bulkUpdateUsers(userIds, updateData) {
     try {
       const result = await User.updateMany(
-        { 
-          $or: [
-            { _id: { $in: userIds } },
-            { id: { $in: userIds } }
-          ]
-        },
+        { _id: { $in: userIds } },
         { 
           ...updateData, 
           lastActivity: new Date() 

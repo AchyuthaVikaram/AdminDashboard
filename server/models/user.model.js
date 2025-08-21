@@ -1,11 +1,17 @@
-// models/User.js
+// models/user.model.js
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     username: {
       type: String,
       required: true,
+      unique: true,
       trim: true,
     },
     email: {
@@ -21,13 +27,19 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["admin", "user"],
-      default: "user",
+      enum: ["Admin", "User"],
+      default: "User",
     },
     status: {
       type: String,
-      enum: ["active", "suspended", "deleted"],
-      default: "active",
+      enum: ["Active", "Inactive", "Suspended"],
+      default: "Active",
+    },
+    avatar: {
+      type: String,
+      default: function() {
+        return `https://ui-avatars.com/api/?name=${encodeURIComponent(this.name || this.username)}&background=6366f1&color=fff`;
+      }
     },
     lastLogin: {
       type: Date,
@@ -79,6 +91,8 @@ const userSchema = new mongoose.Schema(
       referralCode: String,
       country: String,
       timezone: String,
+      totalSessions: { type: Number, default: 0 },
+      totalTimeSpent: { type: Number, default: 0 },
     },
   },
   { 
@@ -95,9 +109,44 @@ userSchema.virtual('activityStatus').get(function() {
   return this.lastActivity > fiveMinutesAgo ? 'active' : 'inactive';
 });
 
+// Virtual for formatted ID
+userSchema.virtual('id').get(function() {
+  return this._id.toHexString();
+});
+
+// Method to format last active time
+userSchema.methods.formatLastActive = function(lastActivity) {
+  const date = lastActivity || this.lastActivity || this.createdAt;
+  if (!date) return 'Never';
+  
+  const now = new Date();
+  const diffInMs = now - new Date(date);
+  const minutes = Math.floor(diffInMs / (1000 * 60));
+  const hours = Math.floor(diffInMs / (1000 * 60 * 60));
+  const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+  if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+  if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
+  if (days < 30) return `${Math.floor(days / 7)} week${Math.floor(days / 7) > 1 ? 's' : ''} ago`;
+  
+  return new Date(date).toLocaleDateString();
+};
+
+// Pre-save middleware to set avatar if not provided
+userSchema.pre('save', function(next) {
+  if (!this.avatar && this.name) {
+    this.avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(this.name)}&background=6366f1&color=fff`;
+  }
+  next();
+});
+
 // Index for performance
 userSchema.index({ email: 1 });
+userSchema.index({ username: 1 });
 userSchema.index({ status: 1 });
+userSchema.index({ role: 1 });
 userSchema.index({ createdAt: -1 });
 userSchema.index({ lastLogin: -1 });
 userSchema.index({ isOnline: 1 });

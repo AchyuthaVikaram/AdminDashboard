@@ -15,24 +15,25 @@ class UsersController {
       const status = req.query.status || '';
       const role = req.query.role || '';
 
-      // Build filter object
+      // Build filter object with case-insensitive matching
       const filter = {};
       
       if (search) {
         filter.$or = [
           { name: { $regex: search, $options: 'i' } },
           { email: { $regex: search, $options: 'i' } },
-          { username: { $regex: search, $options: 'i' } },
-          { id: { $regex: search, $options: 'i' } }
+          { username: { $regex: search, $options: 'i' } }
         ];
       }
       
+      // Fix case sensitivity for status filter
       if (status && status !== 'All Status') {
-        filter.status = status;
+        filter.status = { $regex: new RegExp(`^${status}$`, 'i') };
       }
       
+      // Fix case sensitivity for role filter  
       if (role && role !== 'All Roles') {
-        filter.role = role;
+        filter.role = { $regex: new RegExp(`^${role}$`, 'i') };
       }
 
       // Get users with pagination
@@ -46,18 +47,23 @@ class UsersController {
         User.countDocuments(filter)
       ]);
 
-      // Update lastActive for all users
-      const usersWithUpdatedActive = users.map(user => ({
-        ...user,
-        lastActive: new User(user).formatLastActive(user.lastActivity || user.createdAt)
-      }));
+      // Process users to include all required fields
+      const processedUsers = users.map(user => {
+        const userDoc = new User(user);
+        return {
+          ...user,
+          id: user._id.toString(),
+          avatar: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.username)}&background=6366f1&color=fff`,
+          lastActive: userDoc.formatLastActive(user.lastActivity || user.createdAt)
+        };
+      });
 
       const totalPages = Math.ceil(total / limit);
 
       res.json({
         success: true,
         data: {
-          users: usersWithUpdatedActive,
+          users: processedUsers,
           pagination: {
             current: page,
             pages: totalPages,
@@ -65,7 +71,7 @@ class UsersController {
             hasNext: page < totalPages,
             hasPrev: page > 1,
             showing: {
-              from: skip + 1,
+              from: total > 0 ? skip + 1 : 0,
               to: Math.min(skip + limit, total),
               total
             }
@@ -108,9 +114,7 @@ class UsersController {
     try {
       const { id } = req.params;
       
-      const user = await User.findOne({ 
-        $or: [{ _id: id }, { id: id }] 
-      }).select('-password').lean();
+      const user = await User.findById(id).select('-password').lean();
       
       if (!user) {
         return res.status(404).json({
@@ -119,12 +123,18 @@ class UsersController {
         });
       }
 
-      // Update lastActive
-      user.lastActive = new User(user).formatLastActive(user.lastActivity || user.createdAt);
+      // Process user data
+      const userDoc = new User(user);
+      const processedUser = {
+        ...user,
+        id: user._id.toString(),
+        avatar: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.username)}&background=6366f1&color=fff`,
+        lastActive: userDoc.formatLastActive(user.lastActivity || user.createdAt)
+      };
 
       res.json({
         success: true,
-        data: user
+        data: processedUser
       });
 
     } catch (error) {
@@ -184,6 +194,11 @@ class UsersController {
         deviceInfo: {
           browser: req.get('User-Agent')?.split(' ')[0] || 'Unknown',
           ip: req.ip || req.connection.remoteAddress,
+        },
+        metadata: {
+          registrationSource: 'web',
+          totalSessions: 0,
+          totalTimeSpent: 0
         }
       };
 
@@ -193,8 +208,10 @@ class UsersController {
       const userResponse = newUser.toObject();
       delete userResponse.password;
       
-      // Update lastActive
+      // Process response
+      userResponse.id = userResponse._id.toString();
       userResponse.lastActive = newUser.formatLastActive(newUser.lastActivity);
+      userResponse.avatar = userResponse.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(newUser.name)}&background=6366f1&color=fff`;
 
       res.status(201).json({
         success: true,
@@ -228,8 +245,8 @@ class UsersController {
       // Add activity update
       updates.lastActivity = new Date();
 
-      const user = await User.findOneAndUpdate(
-        { $or: [{ _id: id }, { id: id }] },
+      const user = await User.findByIdAndUpdate(
+        id,
         updates,
         { new: true, runValidators: true }
       ).select('-password');
@@ -241,9 +258,11 @@ class UsersController {
         });
       }
 
-      // Update lastActive
+      // Process response
       const userResponse = user.toObject();
+      userResponse.id = userResponse._id.toString();
       userResponse.lastActive = user.formatLastActive(user.lastActivity);
+      userResponse.avatar = userResponse.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=6366f1&color=fff`;
 
       res.json({
         success: true,
@@ -261,34 +280,21 @@ class UsersController {
     }
   }
 
-  // Delete user
+  // Delete user - FIXED to do permanent delete by default
   async deleteUser(req, res) {
     try {
       const { id } = req.params;
-      const { permanent = false } = req.query;
 
       // Prevent self-deletion
-      if (req.user && (id === req.user._id.toString() || id === req.user.id)) {
+      if (req.user && id === req.user._id.toString()) {
         return res.status(400).json({
           success: false,
           message: 'Cannot delete yourself'
         });
       }
 
-      let user;
-      if (permanent === 'true') {
-        // Permanently delete user
-        user = await User.findOneAndDelete({ 
-          $or: [{ _id: id }, { id: id }] 
-        });
-      } else {
-        // Soft delete (mark as inactive)
-        user = await User.findOneAndUpdate(
-          { $or: [{ _id: id }, { id: id }] },
-          { status: 'Inactive', isOnline: false, lastActivity: new Date() },
-          { new: true }
-        ).select('-password');
-      }
+      // Permanently delete user (changed from soft delete)
+      const user = await User.findByIdAndDelete(id);
 
       if (!user) {
         return res.status(404).json({
@@ -299,7 +305,7 @@ class UsersController {
 
       res.json({
         success: true,
-        message: `User ${permanent === 'true' ? 'permanently deleted' : 'deactivated'} successfully`
+        message: 'User deleted successfully'
       });
 
     } catch (error) {
@@ -367,16 +373,11 @@ class UsersController {
       }
 
       // Prevent admin from affecting themselves
-      const currentUserId = req.user ? (req.user.id || req.user._id.toString()) : null;
+      const currentUserId = req.user ? req.user._id.toString() : null;
       const filteredUserIds = userIds.filter(id => id !== currentUserId);
 
       const result = await User.updateMany(
-        { 
-          $or: [
-            { _id: { $in: filteredUserIds } },
-            { id: { $in: filteredUserIds } }
-          ]
-        },
+        { _id: { $in: filteredUserIds } },
         updateData
       );
 
@@ -424,9 +425,7 @@ class UsersController {
     try {
       const { id } = req.params;
       
-      const user = await User.findOne({ 
-        $or: [{ _id: id }, { id: id }] 
-      });
+      const user = await User.findById(id);
 
       if (!user) {
         return res.status(404).json({
@@ -441,7 +440,9 @@ class UsersController {
 
       const userResponse = user.toObject();
       delete userResponse.password;
+      userResponse.id = userResponse._id.toString();
       userResponse.lastActive = user.formatLastActive(user.lastActivity);
+      userResponse.avatar = userResponse.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=6366f1&color=fff`;
 
       res.json({
         success: true,
