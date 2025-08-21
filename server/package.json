@@ -13,6 +13,7 @@
     "seed-analytics": "node scripts/seedAnalyticsData.js",
     "seed-users": "node scripts/seedUsersData.js",
     "seed-content": "node scripts/contentSeeder.js",
+    "seed-syslogs": "node scripts/seedSysLogs.js",
     "seed:content": "node -e \"require('./scripts/contentSeeder').seedContent().then(() => process.exit(0)).catch(err => { console.error(err); process.exit(1); })\"",
     "clear:content": "node -e \"require('./scripts/contentSeeder').clearContent().then(() => process.exit(0)).catch(err => { console.error(err); process.exit(1); })\"",
     "update:content": "node -e \"require('./scripts/contentSeeder').updateContentSchema().then(() => process.exit(0)).catch(err => { console.error(err); process.exit(1); })\"",
