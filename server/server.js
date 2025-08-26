@@ -16,6 +16,7 @@ const contentRoutes = require("./routes/content.routes");
 const userRoutes = require('./routes/user.routes');
 const analyticsDataRoutes = require('./routes/analyticsData.routes');
 const systemLogsRoutes = require("./routes/systemLogs.routes");
+const adminRoutes = require('./routes/admin.routes');
 const WebSocketService = require('./services/websocketService');
 const { createRateLimit } = require('./middlewares/auth.middleware');
 
@@ -80,7 +81,8 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/analytics-data', analyticsDataRoutes);
 app.use('/api/content', contentRoutes);
-app.use('/api/system-logs',systemLogsRoutes)
+app.use('/api/system-logs',systemLogsRoutes);
+app.use('/api/admin', adminRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

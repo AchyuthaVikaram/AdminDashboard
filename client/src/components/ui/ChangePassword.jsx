@@ -1,6 +1,9 @@
 // File: /src/components/ui/ChangePassword.jsx
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { BASE_URL } from '../../utils/constant';
 
 const ChangePassword = () => {
   const [formData, setFormData] = useState({
@@ -8,6 +11,7 @@ const ChangePassword = () => {
     newPassword: '',
     confirmPassword: ''
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -16,10 +20,75 @@ const ChangePassword = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle password update logic here
-    console.log('Password update requested:', formData);
+    
+    // Validate passwords match
+    if (formData.newPassword !== formData.confirmPassword) {
+      toast.error('New password and confirmation do not match');
+      return;
+    }
+
+    // Validate password strength
+    if (formData.newPassword.length < 8) {
+      toast.error('New password must be at least 8 characters long');
+      return;
+    }
+
+    // Validate password complexity
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+    if (!passwordRegex.test(formData.newPassword)) {
+      toast.error('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character');
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      const token = localStorage.getItem('token');
+      
+      const response = await axios.put(
+        `${BASE_URL}/api/admin/change-password`,
+        {
+          currentPassword: formData.currentPassword,
+          newPassword: formData.newPassword,
+          confirmPassword: formData.confirmPassword
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data.success) {
+        toast.success('Password updated successfully!');
+        setFormData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+      }
+    } catch (error) {
+      console.error('Password update error:', error);
+      
+      if (error.response?.status === 400) {
+        // Handle validation errors
+        const errorData = error.response.data;
+        if (errorData.errors && Array.isArray(errorData.errors)) {
+          // Show first validation error
+          toast.error(errorData.errors[0].msg || 'Validation failed');
+        } else {
+          toast.error(errorData.message || 'Invalid request. Please check your input.');
+        }
+      } else {
+        const errorMessage = error.response?.data?.message || 'Failed to update password. Please try again.';
+        toast.error(errorMessage);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const cardVariants = {
@@ -117,10 +186,11 @@ const ChangePassword = () => {
           whileHover="hover"
           whileTap="tap"
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+          disabled={loading}
+          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
           aria-label="Update password"
         >
-          Update Password
+          {loading ? 'Updating...' : 'Update Password'}
         </motion.button>
       </form>
     </motion.div>

@@ -4,6 +4,11 @@ import ChangePassword from '../components/ui/ChangePassword';
 import NotificationSettings from '../components/ui/NotificationSettings';
 import ManageDevices from '../components/ui/ManageDevices';
 import AccountInfo from '../components/ui/AccountInfo';
+import SystemConfiguration from '../components/ui/SystemConfiguration';
+import EmailTemplates from '../components/ui/EmailTemplates';
+import SecuritySettings from '../components/ui/SecuritySettings';
+import APIManagement from '../components/ui/APIManagement';
+import BackupRestore from '../components/ui/BackupRestore';
 
 const Settings = () => {
   const pageVariants = {
@@ -48,22 +53,64 @@ const Settings = () => {
         <motion.p 
           className="text-gray-400 text-sm sm:text-base"
         >
-          Manage your account settings and preferences
+          Comprehensive admin dashboard settings - manage system configuration, security, integrations, and more
         </motion.p>
       </motion.div>
 
       {/* Settings Grid */}
-      <div className="container mx-auto max-w-7xl">
-        {/* First Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-6 mb-6">
-          <ChangePassword />
-          <NotificationSettings />
+      <div className="container mx-auto max-w-7xl space-y-8">
+        {/* Personal Settings Section */}
+        <div>
+          <h2 className="text-xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">
+            👤 Personal Settings
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <AccountInfo />
+            <ChangePassword />
+          </div>
         </div>
-        
-        {/* Second Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-6">
-          <ManageDevices />
-          <AccountInfo />
+
+        {/* Security & Access Section */}
+        <div>
+          <h2 className="text-xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">
+            🔐 Security & Access
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ManageDevices />
+            <SecuritySettings />
+          </div>
+        </div>
+
+        {/* System Administration Section */}
+        <div>
+          <h2 className="text-xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">
+            ⚙️ System Administration
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <SystemConfiguration />
+            <BackupRestore />
+          </div>
+        </div>
+
+        {/* Communication & Integration Section */}
+        <div>
+          <h2 className="text-xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">
+            📡 Communication & Integration
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <NotificationSettings />
+            <EmailTemplates />
+          </div>
+        </div>
+
+        {/* Developer Tools Section */}
+        <div>
+          <h2 className="text-xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">
+            🛠️ Developer Tools
+          </h2>
+          <div className="grid grid-cols-1 gap-6">
+            <APIManagement />
+          </div>
         </div>
       </div>
     </motion.div>
