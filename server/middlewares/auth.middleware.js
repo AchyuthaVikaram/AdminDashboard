@@ -7,12 +7,25 @@ const Activity = require('../models/activity.model');
 const authenticateToken = async (req, res, next) => {
   try {
     const authHeader = req.headers['authorization'];
+    console.log('Auth header received:', authHeader);
+    
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    console.log('Extracted token:', token ? `${token.substring(0, 20)}...` : 'null');
 
     if (!token) {
+      console.log('No token found in authorization header');
       return res.status(401).json({
         success: false,
         message: 'Access token required'
+      });
+    }
+
+    // Validate token format
+    if (typeof token !== 'string' || token.length < 10) {
+      console.log('Invalid token format:', typeof token, token?.length);
+      return res.status(403).json({
+        success: false,
+        message: 'Invalid token format'
       });
     }
 
@@ -26,14 +39,19 @@ const authenticateToken = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Decoded token:', { userId: decoded.userId, role: decoded.role });
+    
     const user = await User.findById(decoded.userId).select('-password');
     
     if (!user) {
+      console.log('User not found for ID:', decoded.userId);
       return res.status(401).json({
         success: false,
         message: 'Invalid token - user not found'
       });
     }
+    
+    console.log('Found user:', { id: user._id, role: user.role, status: user.status });
 
     // FIXED: Check for both 'active' and 'Active' status (case insensitive)
     if (user.status.toLowerCase() !== 'active') {
@@ -78,19 +96,26 @@ const authenticateToken = async (req, res, next) => {
 // Require admin role
 const requireAdmin = (req, res, next) => {
   if (!req.user) {
+    console.log('No user found in request for admin check');
     return res.status(401).json({
       success: false,
       message: 'Authentication required'
     });
   }
 
+  console.log('Admin check - User role:', req.user.role);
+  
   // FIXED: Case insensitive role check
   if (req.user.role.toLowerCase() !== 'admin') {
+    console.log('Access denied - User role is not admin:', req.user.role);
     return res.status(403).json({
       success: false,
-      message: 'Admin access required'
+      message: 'Admin access required',
+      userRole: req.user.role
     });
   }
+  
+  console.log('Admin access granted for user:', req.user.username);
   next();
 };
 

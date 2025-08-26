@@ -54,7 +54,7 @@ class AuthController {
         username: username.trim(),
         email: email.toLowerCase().trim(),
         password: hashedPassword,
-        role: ( role && role =="admin" )  ? 'admin' : 'user',
+        role: (role && role.toLowerCase() === 'admin') ? 'admin' : 'user',
         deviceInfo: {
           ...deviceInfo,
           ip: req.ip || req.connection.remoteAddress
@@ -190,7 +190,12 @@ class AuthController {
       // Generate JWT token
       const tokenExpiry = rememberMe ? '30d' : '7d';
       const token = jwt.sign(
-        { userId: user._id, role: user.role },
+        { 
+          userId: user._id, 
+          role: user.role,
+          email: user.email,
+          username: user.username
+        },
         process.env.JWT_SECRET,
         { expiresIn: tokenExpiry }
       );

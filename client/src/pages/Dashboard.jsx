@@ -43,11 +43,23 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem("token");
+      console.log('Token from localStorage:', token ? `${token.substring(0, 20)}...` : 'null');
+      console.log('Token type:', typeof token);
+      console.log('Token length:', token?.length);
+      
+      if (!token) {
+        console.error('No token found in localStorage');
+        navigate("/login");
+        return;
+      }
+      
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
+      
+      console.log('Authorization header:', config.headers.Authorization.substring(0, 30) + '...');
 
       // Fetch all dashboard data in parallel
       const [
