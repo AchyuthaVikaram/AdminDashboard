@@ -45,18 +45,18 @@ const TopBar = ({
   };
 
   return (
-    <div className="bg-white/5 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/10 relative z-10">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Analytics Dashboard</h1>
-          <div className="flex items-center gap-4 mt-1">
-            <p className="text-white/60">
+    <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 sm:p-6 shadow-lg border border-white/10 relative z-10">
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+        <div className="flex-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Analytics Dashboard</h1>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-1">
+            <p className="text-white/60 text-sm sm:text-base">
               Monitor system performance and user engagement
             </p>
             {lastUpdated && (
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="text-white/50 text-sm my-4 mr-4 ml-0">
+                <span className="text-white/50 text-xs sm:text-sm">
                   Updated at {lastUpdated.toLocaleTimeString()}
                 </span>
               </div>
@@ -64,7 +64,7 @@ const TopBar = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
           {/* Time Range Dropdown */}
           <div className="relative z-50">
             <label
@@ -152,7 +152,7 @@ const TopBar = ({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-3 ml-4 mt-6">
+          <div className="flex items-center gap-3 sm:ml-4 mt-2 sm:mt-6">
             {/* Refresh Button */}
             <button
               onClick={onRefresh}

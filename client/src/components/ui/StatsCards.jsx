@@ -83,7 +83,7 @@ const StatsCards = ({data}) => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
       {stats.map((stat) => {
         const TrendIcon = stat.trend === 'up' ? TrendingUp : TrendingDown;
         const trendColor = stat.trend === 'up' ? 'text-green-400' : 'text-red-400';
@@ -91,7 +91,7 @@ const StatsCards = ({data}) => {
         return (
           <div
             key={stat.id}
-            className="bg-white/5 backdrop-blur-md p-6 rounded-2xl shadow-lg hover:scale-105 transition-all duration-300 border border-white/10"
+            className="bg-white/5 backdrop-blur-md p-4 sm:p-6 rounded-2xl shadow-lg hover:scale-105 transition-all duration-300 border border-white/10"
           >
             <div className="flex items-center justify-between mb-4">
               <div className={`p-3 rounded-full bg-gradient-to-r ${stat.bgGradient}`}>
@@ -101,10 +101,10 @@ const StatsCards = ({data}) => {
             
             <div>
               <p className="text-white/60 text-sm font-medium">{stat.title}</p>
-              <p className="text-white text-2xl font-bold mt-1">{stat.value}</p>
+              <p className="text-white text-xl sm:text-2xl font-bold mt-1">{stat.value}</p>
               <div className={`flex items-center gap-1 mt-2 ${trendColor}`}>
                 <TrendIcon className="w-4 h-4" />
-                <span className="text-sm font-medium">{stat.change} {stat.changeText}</span>
+                <span className="text-xs sm:text-sm font-medium">{stat.change} {stat.changeText}</span>
               </div>
             </div>
           </div>

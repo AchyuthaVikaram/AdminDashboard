@@ -87,7 +87,7 @@ const Login = () => {
   return (
     <div
       ref={containerRef}
-      className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden"
+      className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 relative overflow-hidden"
       style={{
         background:
           "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%)",
@@ -178,7 +178,7 @@ const Login = () => {
 
       {/* Main Content Container */}
       <div
-        className="w-full max-w-md relative z-10"
+        className="w-full max-w-md sm:max-w-lg relative z-10"
         style={{
           transform: isVisible
             ? "translateY(0px) scale(1) rotateX(0deg)"
@@ -223,7 +223,7 @@ const Login = () => {
 
         {/* Enhanced Login Form with 3D Depth */}
         <div
-          className="bg-zinc-900/40 backdrop-blur-lg border border-zinc-800/50 rounded-2xl p-8 shadow-2xl relative group"
+          className="bg-zinc-900/40 backdrop-blur-lg border border-zinc-800/50 rounded-2xl p-6 sm:p-8 shadow-2xl relative group"
           style={{
             transform: isVisible
               ? `perspective(1000px) rotateX(${
