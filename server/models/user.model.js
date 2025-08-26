@@ -95,6 +95,23 @@ userSchema.virtual('activityStatus').get(function() {
   return this.lastActivity > fiveMinutesAgo ? 'active' : 'inactive';
 });
 
+// Method to format last active time
+userSchema.methods.formatLastActive = function(date) {
+  if (!date) return 'Never';
+  
+  const now = new Date();
+  const diffInMs = now - new Date(date);
+  const minutes = Math.floor(diffInMs / (1000 * 60));
+  const hours = Math.floor(diffInMs / (1000 * 60 * 60));
+  const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+  if (minutes < 1) return 'Just now';
+  if (minutes < 60) return `${minutes} min${minutes > 1 ? 's' : ''} ago`;
+  if (hours < 24) return `${hours} hr${hours > 1 ? 's' : ''} ago`;
+  if (days < 30) return `${days} day${days > 1 ? 's' : ''} ago`;
+  return new Date(date).toLocaleDateString();
+};
+
 // Index for performance
 userSchema.index({ email: 1 });
 userSchema.index({ status: 1 });

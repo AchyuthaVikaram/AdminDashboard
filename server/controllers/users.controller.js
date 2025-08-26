@@ -20,7 +20,6 @@ class UsersController {
       
       if (search) {
         filter.$or = [
-          { name: { $regex: search, $options: 'i' } },
           { email: { $regex: search, $options: 'i' } },
           { username: { $regex: search, $options: 'i' } }
         ];
@@ -53,7 +52,7 @@ class UsersController {
         return {
           ...user,
           id: user._id.toString(),
-          avatar: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.username)}&background=6366f1&color=fff`,
+          avatar: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=6366f1&color=fff`,
           lastActive: userDoc.formatLastActive(user.lastActivity || user.createdAt)
         };
       });
@@ -128,7 +127,7 @@ class UsersController {
       const processedUser = {
         ...user,
         id: user._id.toString(),
-        avatar: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.username)}&background=6366f1&color=fff`,
+        avatar: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=6366f1&color=fff`,
         lastActive: userDoc.formatLastActive(user.lastActivity || user.createdAt)
       };
 
@@ -151,19 +150,18 @@ class UsersController {
   async createUser(req, res) {
     try {
       const {
-        name,
         username,
         email,
         password,
-        role = 'User',
-        status = 'Active'
+        role = 'user',
+        status = 'active'
       } = req.body;
 
       // Validation
-      if (!name || !username || !email || !password) {
+      if (!username || !email || !password) {
         return res.status(400).json({
           success: false,
-          message: 'Name, username, email, and password are required'
+          message: 'Username, email, and password are required'
         });
       }
 
@@ -184,12 +182,11 @@ class UsersController {
 
       // Create user
       const userData = {
-        name,
         username,
         email,
         password: hashedPassword,
-        role,
-        status,
+        role: role.toLowerCase(),
+        status: status.toLowerCase(),
         lastActivity: new Date(),
         deviceInfo: {
           browser: req.get('User-Agent')?.split(' ')[0] || 'Unknown',
@@ -211,7 +208,7 @@ class UsersController {
       // Process response
       userResponse.id = userResponse._id.toString();
       userResponse.lastActive = newUser.formatLastActive(newUser.lastActivity);
-      userResponse.avatar = userResponse.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(newUser.name)}&background=6366f1&color=fff`;
+      userResponse.avatar = userResponse.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(newUser.username)}&background=6366f1&color=fff`;
 
       res.status(201).json({
         success: true,
@@ -262,7 +259,7 @@ class UsersController {
       const userResponse = user.toObject();
       userResponse.id = userResponse._id.toString();
       userResponse.lastActive = user.formatLastActive(user.lastActivity);
-      userResponse.avatar = userResponse.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=6366f1&color=fff`;
+      userResponse.avatar = userResponse.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=6366f1&color=fff`;
 
       res.json({
         success: true,
@@ -342,27 +339,27 @@ class UsersController {
 
       switch (action) {
         case 'activate':
-          updateData.status = 'Active';
+          updateData.status = 'active';
           actionDescription = 'activated';
           break;
         case 'deactivate':
-          updateData.status = 'Inactive';
+          updateData.status = 'inactive';
           updateData.isOnline = false;
           actionDescription = 'deactivated';
           break;
         case 'suspend':
-          updateData.status = 'Suspended';
+          updateData.status = 'suspended';
           updateData.isOnline = false;
           actionDescription = 'suspended';
           break;
         case 'update_role':
-          if (!data.role || !['User', 'Admin'].includes(data.role)) {
+          if (!data.role || !['user', 'admin'].includes(data.role.toLowerCase())) {
             return res.status(400).json({
               success: false,
               message: 'Valid role is required'
             });
           }
-          updateData.role = data.role;
+          updateData.role = data.role.toLowerCase();
           actionDescription = `role updated to ${data.role}`;
           break;
         default:
@@ -442,7 +439,7 @@ class UsersController {
       delete userResponse.password;
       userResponse.id = userResponse._id.toString();
       userResponse.lastActive = user.formatLastActive(user.lastActivity);
-      userResponse.avatar = userResponse.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=6366f1&color=fff`;
+      userResponse.avatar = userResponse.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=6366f1&color=fff`;
 
       res.json({
         success: true,

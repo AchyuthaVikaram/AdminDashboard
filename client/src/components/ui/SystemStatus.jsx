@@ -204,16 +204,6 @@ const SystemStatus = ({ systemStatus = {} }) => {
           <span>{new Date().toLocaleTimeString()}</span>
         </div>
       </div>
-
-      {/* Quick Actions */}
-      <div className="mt-3 flex gap-2">
-        <button className="flex-1 px-3 py-1 text-xs bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 rounded transition-colors">
-          View Details
-        </button>
-        <button className="flex-1 px-3 py-1 text-xs bg-gray-600/20 hover:bg-gray-600/30 text-gray-400 rounded transition-colors">
-          Refresh
-        </button>
-      </div>
     </motion.div>
   );
 };

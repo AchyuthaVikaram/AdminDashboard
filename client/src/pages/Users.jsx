@@ -115,14 +115,14 @@ const ViewUserModal = ({ user, onClose }) => {
           <div className="flex items-center space-x-4 p-4 bg-gray-700/50 rounded-lg">
             <img
               src={user.avatar}
-              alt={user.name}
+              alt={user.username}
               className="w-16 h-16 rounded-full object-cover"
               onError={(e) => {
-                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=6366f1&color=fff`;
+                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=6366f1&color=fff`;
               }}
             />
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-white">{user.name}</h3>
+              <h3 className="text-lg font-semibold text-white">{user.username}</h3>
               <p className="text-gray-400">{user.email}</p>
               <p className="text-gray-500 text-sm">@{user.username}</p>
             </div>
@@ -212,9 +212,8 @@ const ViewUserModal = ({ user, onClose }) => {
 // Edit User Modal
 const EditUserModal = ({ user, onClose, onSave }) => {
   const [formData, setFormData] = useState({
-    name: user.name || '',
-    email: user.email || '',
     username: user.username || '',
+    email: user.email || '',
     role: user.role || 'User',
     status: user.status || 'Active'
   });
@@ -223,9 +222,8 @@ const EditUserModal = ({ user, onClose, onSave }) => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
-    if (!formData.email.trim()) newErrors.email = 'Email is required';
     if (!formData.username.trim()) newErrors.username = 'Username is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
     if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Invalid email format';
     
     setErrors(newErrors);
@@ -270,19 +268,19 @@ const EditUserModal = ({ user, onClose, onSave }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Name */}
+          {/* Username */}
           <div>
             <label className="block text-gray-300 text-sm font-medium mb-2">
-              Full Name
+              Username
             </label>
             <input
               type="text"
-              value={formData.name}
-              onChange={(e) => handleChange('name', e.target.value)}
-              className={`w-full bg-gray-700 border ${errors.name ? 'border-red-500' : 'border-gray-600'} rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500`}
-              placeholder="Enter full name"
+              value={formData.username}
+              onChange={(e) => handleChange('username', e.target.value)}
+              className={`w-full bg-gray-700 border ${errors.username ? 'border-red-500' : 'border-gray-600'} rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500`}
+              placeholder="Enter username"
             />
-            {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
+            {errors.username && <p className="text-red-400 text-xs mt-1">{errors.username}</p>}
           </div>
 
           {/* Email */}
@@ -298,21 +296,6 @@ const EditUserModal = ({ user, onClose, onSave }) => {
               placeholder="Enter email address"
             />
             {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
-          </div>
-
-          {/* Username */}
-          <div>
-            <label className="block text-gray-300 text-sm font-medium mb-2">
-              Username
-            </label>
-            <input
-              type="text"
-              value={formData.username}
-              onChange={(e) => handleChange('username', e.target.value)}
-              className={`w-full bg-gray-700 border ${errors.username ? 'border-red-500' : 'border-gray-600'} rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500`}
-              placeholder="Enter username"
-            />
-            {errors.username && <p className="text-red-400 text-xs mt-1">{errors.username}</p>}
           </div>
 
           {/* Role and Status */}
@@ -382,9 +365,8 @@ const EditUserModal = ({ user, onClose, onSave }) => {
 // Create User Modal
 const CreateUserModal = ({ onClose, onSave }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
     username: '',
+    email: '',
     password: '',
     role: 'User',
     status: 'Active'
@@ -394,9 +376,8 @@ const CreateUserModal = ({ onClose, onSave }) => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
-    if (!formData.email.trim()) newErrors.email = 'Email is required';
     if (!formData.username.trim()) newErrors.username = 'Username is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
     if (!formData.password.trim()) newErrors.password = 'Password is required';
     if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Invalid email format';
     if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
@@ -443,19 +424,19 @@ const CreateUserModal = ({ onClose, onSave }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Name */}
+          {/* Username */}
           <div>
             <label className="block text-gray-300 text-sm font-medium mb-2">
-              Full Name *
+              Username *
             </label>
             <input
               type="text"
-              value={formData.name}
-              onChange={(e) => handleChange('name', e.target.value)}
-              className={`w-full bg-gray-700 border ${errors.name ? 'border-red-500' : 'border-gray-600'} rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500`}
-              placeholder="Enter full name"
+              value={formData.username}
+              onChange={(e) => handleChange('username', e.target.value)}
+              className={`w-full bg-gray-700 border ${errors.username ? 'border-red-500' : 'border-gray-600'} rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500`}
+              placeholder="Enter username"
             />
-            {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
+            {errors.username && <p className="text-red-400 text-xs mt-1">{errors.username}</p>}
           </div>
 
           {/* Email */}
@@ -471,21 +452,6 @@ const CreateUserModal = ({ onClose, onSave }) => {
               placeholder="Enter email address"
             />
             {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
-          </div>
-
-          {/* Username */}
-          <div>
-            <label className="block text-gray-300 text-sm font-medium mb-2">
-              Username *
-            </label>
-            <input
-              type="text"
-              value={formData.username}
-              onChange={(e) => handleChange('username', e.target.value)}
-              className={`w-full bg-gray-700 border ${errors.username ? 'border-red-500' : 'border-gray-600'} rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500`}
-              placeholder="Enter username"
-            />
-            {errors.username && <p className="text-red-400 text-xs mt-1">{errors.username}</p>}
           </div>
 
           {/* Password */}
@@ -608,7 +574,7 @@ const DeleteConfirmModal = ({ user, onClose, onConfirm }) => {
 
           <p className="text-gray-300">
             Are you sure you want to delete the user{" "}
-            <span className="font-semibold text-white">{user.name}</span>?
+            <span className="font-semibold text-white">{user.username}</span>?
           </p>
           <p className="text-gray-400 text-sm mt-2">
             Email: {user.email}
@@ -772,14 +738,14 @@ const UserRow = ({ user, index, onAction, loading }) => {
         <div className="flex items-center space-x-3">
           <img
             src={user.avatar}
-            alt={user.name}
+            alt={user.username}
             className="w-8 h-8 rounded-full object-cover"
             onError={(e) => {
-              e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=6366f1&color=fff`;
+              e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=6366f1&color=fff`;
             }}
           />
           <div>
-            <div className="text-white font-medium">{user.name}</div>
+            <div className="text-white font-medium">{user.username}</div>
             <div className="text-gray-400 text-sm">{user.email}</div>
           </div>
         </div>

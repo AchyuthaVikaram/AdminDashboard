@@ -11,6 +11,7 @@ const LogFilters = ({
   onClear,
   onRefresh,
   loading = false,
+  systemLogs = [],
 }) => {
   const [searchTerm, setSearchTerm] = useState(filters.search || "");
   const [selectedLevel, setSelectedLevel] = useState(
@@ -285,8 +286,70 @@ const LogFilters = ({
         </motion.div>
       )}
 
+      {/* System Logs Table */}
+      {systemLogs.length > 0 && (
+        <motion.div variants={itemVariants} className="border-t border-gray-700/30 pt-4">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-700">
+                  <th className="text-left py-3 px-4 text-gray-300 font-medium">Level</th>
+                  <th className="text-left py-3 px-4 text-gray-300 font-medium">Message</th>
+                  <th className="text-left py-3 px-4 text-gray-300 font-medium">Source</th>
+                  <th className="text-left py-3 px-4 text-gray-300 font-medium">Time</th>
+                  <th className="text-left py-3 px-4 text-gray-300 font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {systemLogs.map((log, index) => (
+                  <tr key={log._id || index} className="border-b border-gray-700/50 hover:bg-gray-700/20">
+                    <td className="py-3 px-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        log.level === 'error' ? 'bg-red-500/20 text-red-400' :
+                        log.level === 'warning' ? 'bg-yellow-500/20 text-yellow-400' :
+                        log.level === 'info' ? 'bg-blue-500/20 text-blue-400' :
+                        'bg-gray-500/20 text-gray-400'
+                      }`}>
+                        {log.level?.toUpperCase()}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-white max-w-md truncate">
+                      {log.message}
+                    </td>
+                    <td className="py-3 px-4 text-gray-300">
+                      {log.source}
+                    </td>
+                    <td className="py-3 px-4 text-gray-400 text-sm">
+                      {log.timeAgo || new Date(log.createdAt).toLocaleTimeString()}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        log.resolved ? 'bg-green-500/20 text-green-400' : 'bg-orange-500/20 text-orange-400'
+                      }`}>
+                        {log.resolved ? 'Resolved' : 'Open'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </motion.div>
+      )}
+
+      {/* No Logs Message */}
+      {systemLogs.length === 0 && !loading && (
+        <motion.div variants={itemVariants} className="border-t border-gray-700/30 pt-4">
+          <div className="text-center py-8 text-gray-400">
+            <div className="text-4xl mb-2">📝</div>
+            <p>No system logs found</p>
+            <p className="text-sm mt-1">Logs will appear here as they are generated</p>
+          </div>
+        </motion.div>
+      )}
+
       {/* Action Buttons Row */}
-      <div className="flex flex-col sm:flex-row gap-3 pt-2">
+      <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-700/30">
         <motion.button
           variants={buttonVariants}
           whileHover="hover"

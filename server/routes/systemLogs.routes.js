@@ -187,7 +187,7 @@ router.delete(
  */
 router.get("/filters", requireAdmin, async (req, res) => {
   try {
-    const SystemLog = require("../models/systemLog.model");
+    const SystemLog = require("../models/systemLogs.model");
 
     const [sources, categories] = await Promise.all([
       SystemLog.distinct("source"),
@@ -227,7 +227,7 @@ router.get("/filters", requireAdmin, async (req, res) => {
  */
 router.get("/stats", requireAdmin, async (req, res) => {
   try {
-    const SystemLog = require("../models/systemLog.model");
+    const SystemLog = require("../models/systemLogs.model");
     const stats = await SystemLog.getLogStatistics();
 
     res.json({

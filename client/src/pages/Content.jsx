@@ -1098,12 +1098,25 @@ const AdminContentPage = () => {
           setCurrentPage(targetPage);
         }
 
-        // Refresh data
+        // Refresh data and update stats immediately
         await Promise.all([
           fetchContent(targetPage, searchTerm, statusFilter, typeFilter),
           fetchStats(),
           fetchAnalytics(),
         ]);
+        
+        // Update pagination state optimistically
+        const newTotalContent = Math.max(0, (stats.totalContent || 0) - 1);
+        const itemsPerPage = pagination.limit || 10;
+        const newTotalPages = Math.max(1, Math.ceil(newTotalContent / itemsPerPage));
+        
+        setStats(prevStats => ({
+          ...prevStats,
+          totalContent: newTotalContent
+        }));
+        
+        // Update total pages immediately
+        setTotalPages(newTotalPages);
       }
     } catch (error) {
       console.error("Error deleting content:", error);

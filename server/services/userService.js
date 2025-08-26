@@ -18,10 +18,10 @@ class UserService {
         thisMonthRegistrations
       ] = await Promise.all([
         User.countDocuments(),
-        User.countDocuments({ status: 'Active' }),
-        User.countDocuments({ role: 'Admin' }),
-        User.countDocuments({ status: 'Inactive' }),
-        User.countDocuments({ status: 'Suspended' }),
+        User.countDocuments({ status: 'active' }),
+        User.countDocuments({ role: 'admin' }),
+        User.countDocuments({ status: 'inactive' }),
+        User.countDocuments({ status: 'suspended' }),
         User.countDocuments({ isOnline: true }),
         User.countDocuments({
           createdAt: {
@@ -79,7 +79,7 @@ class UserService {
       const recentUsers = await User.find({
         lastActivity: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
       })
-      .select('name username lastActivity status role')
+      .select('username lastActivity status role')
       .sort({ lastActivity: -1 })
       .limit(10)
       .lean();
@@ -87,7 +87,7 @@ class UserService {
       // Convert to activity format
       const activities = recentUsers.map(user => ({
         id: user._id,
-        user: user.name,
+        user: user.username,
         username: user.username,
         action: this.getRandomActivity(),
         time: this.formatTimeAgo(user.lastActivity),

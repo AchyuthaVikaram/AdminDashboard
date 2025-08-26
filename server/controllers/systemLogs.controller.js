@@ -640,7 +640,11 @@ class SystemLogsController {
       const hourValue = hour.getHours();
 
       // Find matching data from trend
-      const trendData = trend.find((t) => t._id === hourValue) || { total: 0 };
+      const trendData = trend.find((t) => t._id === hourValue) || { 
+        total: 0, 
+        errors: 0, 
+        warnings: 0 
+      };
 
       hours.push({
         label:
@@ -652,11 +656,14 @@ class SystemLogsController {
             ? `${hourValue - 12} PM`
             : `${hourValue} AM`,
         value: trendData.total || 0,
+        errors: trendData.errors || 0,
+        warnings: trendData.warnings || 0,
+        hour: hourValue,
       });
     }
 
-    // Take every other hour for display (12 data points)
-    return hours.filter((_, index) => index % 2 === 0);
+    // Return all 24 hours for better visualization
+    return hours;
   }
 
   static formatTimeAgo(date) {

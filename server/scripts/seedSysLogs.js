@@ -252,7 +252,8 @@ const seedSystemLogs = async () => {
     console.log("🌱 Starting system logs seeding...");
 
     // Connect to database
-    await mongoose.connect(process.env.MONGODB_URI, {
+    const mongoUri = process.env.MONGODB_URI;
+    await mongoose.connect(mongoUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
