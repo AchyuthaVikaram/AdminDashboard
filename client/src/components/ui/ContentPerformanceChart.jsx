@@ -111,18 +111,19 @@ const ContentPerformanceChart = () => {
       </div>
       
       <div className="h-80">
-        <ResponsiveContainer width="100%" height="100%">
+         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={currentData} layout="horizontal" margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
             <XAxis 
-              type="number" 
+             
+              type="category" 
               stroke="rgba(255,255,255,0.6)" 
               fontSize={12}
               tickFormatter={(value) => viewMode === 'views' ? `${value/1000}k` : `${value}%`}
             />
             <YAxis 
               dataKey="name" 
-              type="category" 
+               type="number" 
               stroke="rgba(255,255,255,0.6)" 
               width={80}
               fontSize={12}
@@ -140,7 +141,7 @@ const ContentPerformanceChart = () => {
               </linearGradient>
             </defs>
           </BarChart>
-        </ResponsiveContainer>
+        </ResponsiveContainer> 
       </div>
 
       {/* Trend Chart */}
