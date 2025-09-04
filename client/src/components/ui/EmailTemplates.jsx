@@ -36,7 +36,6 @@ const EmailTemplates = () => {
     }
   ]);
 
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [loading, setLoading] = useState(false);
 
   // Get auth token
@@ -83,9 +82,7 @@ const EmailTemplates = () => {
     }
   };
 
-  const handleEditTemplate = (template) => {
-    setSelectedTemplate(template);
-  };
+  // Edit functionality is not supported; only enable/disable is available.
 
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -136,12 +133,6 @@ const EmailTemplates = () => {
               
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => handleEditTemplate(template)}
-                  className="px-3 py-1 text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
-                >
-                  Edit
-                </button>
-                <button
                   onClick={() => handleToggleTemplate(template.id)}
                   disabled={loading}
                   className={`px-3 py-1 text-sm font-medium rounded transition-colors ${
@@ -157,7 +148,7 @@ const EmailTemplates = () => {
           </div>
         ))}
       </div>
-
+      {/*reomved edit functionality */}
       {/* Creating templates is not supported by the API; actions limited to enable/disable. */}
     </motion.div>
   );
