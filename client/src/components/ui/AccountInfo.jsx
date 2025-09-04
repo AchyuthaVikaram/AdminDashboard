@@ -1,20 +1,73 @@
 // File: /src/components/ui/AccountInfo.jsx
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { BASE_URL } from '../../utils/constant';
 
 const AccountInfo = () => {
-  const [userInfo] = useState({
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    role: 'Administrator'
+  const [userInfo, setUserInfo] = useState({
+    username: '',
+    email: '',
+    role: ''
   });
-
   const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const handleEditInfo = () => {
-    setIsEditing(!isEditing);
-    // Handle edit info logic here
-    console.log('Edit info requested');
+  const getAuthToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/api/auth/profile`, {
+          headers: { Authorization: `Bearer ${getAuthToken()}` }
+        });
+        if (res.data?.success) {
+          const { username, email, role } = res.data.data;
+          setUserInfo({ username: username || '', email: email || '', role: role || '' });
+        }
+      } catch (error) {
+        console.error('Failed to fetch profile', error);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const handleEditInfo = async () => {
+    if (!isEditing) {
+      setIsEditing(true);
+      return;
+    }
+
+    if (!userInfo.username?.trim()) {
+      toast.error('Username cannot be empty');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await axios.put(`${BASE_URL}/api/auth/profile`, {
+        username: userInfo.username.trim()
+      }, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
+
+      if (res.data?.success) {
+        toast.success('Profile updated');
+        setIsEditing(false);
+        // Update cached user if stored
+        const cached = localStorage.getItem('user');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          parsed.username = userInfo.username.trim();
+          localStorage.setItem('user', JSON.stringify(parsed));
+        }
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const cardVariants = {

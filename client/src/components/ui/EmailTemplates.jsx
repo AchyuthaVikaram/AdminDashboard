@@ -158,11 +158,7 @@ const EmailTemplates = () => {
         ))}
       </div>
 
-      <div className="mt-6 pt-4 border-t border-gray-700">
-        <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-300" onClick={()=>console.log("Hello")}>
-          Create New Template
-        </button>
-      </div>
+      {/* Creating templates is not supported by the API; actions limited to enable/disable. */}
     </motion.div>
   );
 };

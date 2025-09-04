@@ -1,35 +1,37 @@
 // File: /src/components/ui/ManageDevices.jsx
 import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 import { 
   ComputerDesktopIcon, 
   DevicePhoneMobileIcon, 
   DeviceTabletIcon 
 } from '@heroicons/react/24/outline';
+import { BASE_URL } from '../../utils/constant';
 
 const ManageDevices = () => {
-  const devices = [
-    {
-      id: 1,
-      name: 'Windows Desktop',
-      type: 'desktop',
-      lastActive: '2 hours ago',
-      current: true
-    },
-    {
-      id: 2,
-      name: 'iPhone 14',
-      type: 'mobile',
-      lastActive: '1 day ago',
-      current: false
-    },
-    {
-      id: 3,
-      name: 'MacBook Pro',
-      type: 'desktop',
-      lastActive: '3 days ago',
-      current: false
-    }
-  ];
+  const [currentDevice, setCurrentDevice] = useState({ device: 'Desktop', os: 'Unknown', browser: 'Unknown' });
+  const [lastLogin, setLastLogin] = useState(null);
+
+  const getAuthToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/api/auth/profile`, {
+          headers: { Authorization: `Bearer ${getAuthToken()}` }
+        });
+        if (res.data?.success) {
+          const { deviceInfo, lastLogin: last } = res.data.data || {};
+          if (deviceInfo) setCurrentDevice(deviceInfo);
+          if (last) setLastLogin(last);
+        }
+      } catch (error) {
+        console.error('Failed to fetch profile for devices', error);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const getDeviceIcon = (type) => {
     switch (type) {
@@ -42,10 +44,7 @@ const ManageDevices = () => {
     }
   };
 
-  const handleLogoutOtherDevices = () => {
-    // Handle logout from other devices logic here
-    console.log('Logging out from other devices...');
-  };
+  // No server endpoint present to manage other device sessions; show read-only info.
 
   const cardVariants = {
     hidden: { 
@@ -115,57 +114,32 @@ const ManageDevices = () => {
       </div>
 
       <div className="space-y-3 mb-6">
-        {devices.map((device, index) => (
-          <motion.div
-            key={device.id}
-            variants={deviceVariants}
-            initial="hidden"
-            animate="visible"
-            whileHover="hover"
-            custom={index}
-            className="bg-gray-700 rounded-lg p-4 border border-gray-600/30 hover:border-gray-500/50 transition-all duration-300"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="text-gray-300">
-                  {getDeviceIcon(device.type)}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-200 font-medium">{device.name}</span>
-                    {device.current && (
-                      <span className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded-full border border-green-500/30">
-                        Current
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-gray-400 text-sm">Last active: {device.lastActive}</span>
-                </div>
+        <motion.div
+          variants={deviceVariants}
+          initial="hidden"
+          animate="visible"
+          className="bg-gray-700 rounded-lg p-4 border border-gray-600/30 hover:border-gray-500/50 transition-all duration-300"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="text-gray-300">
+                {getDeviceIcon((currentDevice.device || 'desktop').toLowerCase())}
               </div>
-              
-              {!device.current && (
-                <button
-                  className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors duration-200"
-                  aria-label={`Remove ${device.name}`}
-                >
-                  Remove
-                </button>
-              )}
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-200 font-medium">{currentDevice.os || 'Unknown OS'}</span>
+                  <span className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded-full border border-green-500/30">
+                    Current
+                  </span>
+                </div>
+                <span className="text-gray-400 text-sm">Browser: {currentDevice.browser || 'Unknown'}{lastLogin ? ` • Last login: ${new Date(lastLogin).toLocaleString()}` : ''}</span>
+              </div>
             </div>
-          </motion.div>
-        ))}
+          </div>
+        </motion.div>
       </div>
 
-      <motion.button
-        variants={buttonVariants}
-        whileHover="hover"
-        whileTap="tap"
-        onClick={handleLogoutOtherDevices}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
-        aria-label="Log out from other devices"
-      >
-        Log out from other devices
-      </motion.button>
+      <div className="text-gray-400 text-xs text-center">Device session management is read-only in this demo.</div>
     </motion.div>
   );
 };

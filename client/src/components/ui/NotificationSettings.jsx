@@ -1,6 +1,9 @@
 // File: /src/components/ui/NotificationSettings.jsx
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { BASE_URL } from '../../utils/constant';
 
 const NotificationSettings = () => {
   const [notifications, setNotifications] = useState({
@@ -9,6 +12,32 @@ const NotificationSettings = () => {
     systemWarnings: true,
     weeklySummary: true
   });
+  const [saving, setSaving] = useState(false);
+
+  const getAuthToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/api/auth/profile`, {
+          headers: { Authorization: `Bearer ${getAuthToken()}` }
+        });
+        if (res.data?.success) {
+          const prefs = res.data.data?.preferences || {};
+          const notif = prefs.notifications || {};
+          setNotifications(prev => ({
+            appNotifications: notif.appNotifications ?? prev.appNotifications,
+            emailAlerts: notif.emailAlerts ?? prev.emailAlerts,
+            systemWarnings: notif.systemWarnings ?? prev.systemWarnings,
+            weeklySummary: notif.weeklySummary ?? prev.weeklySummary
+          }));
+        }
+      } catch (error) {
+        console.error('Failed to fetch profile for notifications', error);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const handleToggle = (key) => {
     setNotifications(prev => ({
@@ -17,9 +46,22 @@ const NotificationSettings = () => {
     }));
   };
 
-  const handleSave = () => {
-    // Handle save preferences logic here
-    console.log('Saving notification preferences:', notifications);
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await axios.put(`${BASE_URL}/api/auth/profile`, {
+        preferences: { notifications }
+      }, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
+      if (res.data?.success) {
+        toast.success('Notification preferences saved');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to save preferences');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const cardVariants = {
@@ -139,10 +181,11 @@ const NotificationSettings = () => {
         whileHover="hover"
         whileTap="tap"
         onClick={handleSave}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+        disabled={saving}
+        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
         aria-label="Save notification preferences"
       >
-        Save Preferences
+        {saving ? 'Saving...' : 'Save Preferences'}
       </motion.button>
     </motion.div>
   );

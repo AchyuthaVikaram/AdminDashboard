@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { BASE_URL } from '../../utils/constant';
+import { useNavigate } from 'react-router-dom';
 
 const SecuritySettings = () => {
   const [securityConfig, setSecurityConfig] = useState({
@@ -20,6 +21,7 @@ const SecuritySettings = () => {
 
   const [auditLogs, setAuditLogs] = useState([]);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   // Get auth token
   const getAuthToken = () => {
@@ -251,7 +253,10 @@ const SecuritySettings = () => {
               </div>
             ))}
           </div>
-          <button className="mt-3 text-blue-400 hover:text-blue-300 text-sm font-medium">
+          <button
+            className="mt-3 text-blue-400 hover:text-blue-300 text-sm font-medium"
+            onClick={() => navigate('/admin/system-logs')}
+          >
             View Full Audit Log →
           </button>
         </div>

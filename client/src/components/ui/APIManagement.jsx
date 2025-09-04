@@ -210,9 +210,7 @@ const APIManagement = () => {
       <div>
         <div className="flex justify-between items-center mb-4">
           <h4 className="text-lg font-medium text-white">Webhooks</h4>
-          <button className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors">
-            Add Webhook
-          </button>
+          <span className="text-gray-400 text-sm">Read-only</span>
         </div>
 
         <div className="space-y-3">
@@ -232,10 +230,7 @@ const APIManagement = () => {
                     {webhook.status}
                   </span>
                 </div>
-                <div className="flex gap-2">
-                  <button className="text-blue-400 hover:text-blue-300 text-sm">Edit</button>
-                  <button className="text-red-400 hover:text-red-300 text-sm">Delete</button>
-                </div>
+                <div className="text-gray-500 text-xs">Management not available in demo</div>
               </div>
             </div>
           ))}
