@@ -40,6 +40,10 @@ const Login = () => {
 
       localStorage.setItem("token", data.data.token);
       localStorage.setItem("user", JSON.stringify(data.data.user));
+      if (data?.data?.expiresIn) {
+        const expiryAt = Date.now() + Number(data.data.expiresIn);
+        localStorage.setItem("token_expiry", String(expiryAt));
+      }
       showSuccessToast("Login successful");
 
       if (data.data.user.role === "admin") {

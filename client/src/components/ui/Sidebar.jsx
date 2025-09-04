@@ -39,22 +39,30 @@ const Sidebar = () => {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post(
-        `${BASE_URL}/api/auth/logout`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      // Attempt server logout, but proceed locally even if it fails (e.g., token expired)
+      try {
+        await axios.post(
+          `${BASE_URL}/api/auth/logout`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } catch (_) {}
+
       localStorage.removeItem("token");
+      localStorage.removeItem("token_expiry");
       localStorage.removeItem("user");
-      showSuccessToast("Logout successfully!");
+      showSuccessToast("Logged out");
       navigate("/login");
     } catch (error) {
-      console.log("failed to logout" + error);
-      showErrorToast("Failed to Logout! Try again!");
+      // Ensure local logout always completes
+      localStorage.removeItem("token");
+      localStorage.removeItem("token_expiry");
+      localStorage.removeItem("user");
+      navigate("/login");
     }
   };
 

@@ -20,7 +20,16 @@ import AdminUsersPage from "./pages/Users";
 import AdminContentPage from "./pages/Content";
 
 function App() {
-  const user = localStorage.getItem("user");
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const token = localStorage.getItem("token");
+  const tokenExpiry = Number(localStorage.getItem("token_expiry") || 0);
+  const isExpired = token && tokenExpiry && Date.now() > tokenExpiry;
+
+  if (isExpired) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("token_expiry");
+    localStorage.removeItem("user");
+  }
 
   return (
     <Router>
@@ -38,7 +47,7 @@ function App() {
         <Route
           path="/"
           element={
-            user ? (
+            user && token && !isExpired ? (
               user.role === "admin" ? (
                 <Navigate to="/admin" />
               ) : (
