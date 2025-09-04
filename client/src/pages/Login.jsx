@@ -390,7 +390,8 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-all duration-300"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-all duration-300 z-20"
+
                   style={{
                     transform: "scale(1)",
                     transition: "all 0.3s cubic-bezier(0.22, 1, 0.36, 1)",

@@ -38,15 +38,14 @@ app.use(helmet({
 }));
 
 // CORS configuration
+// CORS configuration (allow everything)
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL] 
-    : ['http://localhost:3000', 'http://localhost:5173',"https://admindashboardwebortex.netlify.app/"],
-  credentials: true,
-  optionsSuccessStatus: 200,
+  origin: "*",   // ✅ allow all origins
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
+
+
 
 app.use(cors(corsOptions));
 app.use(compression());
