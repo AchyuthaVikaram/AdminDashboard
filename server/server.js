@@ -38,9 +38,25 @@ app.use(helmet({
 }));
 
 // CORS configuration
-// CORS configuration (allow everything)
+// Allow localhost and deployed frontend URL(s)
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  ...(process.env.FRONTEND_URLS ? process.env.FRONTEND_URLS.split(',').map(s => s.trim()) : []),
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173'
+].filter(Boolean);
+
 const corsOptions = {
-  origin: "*",   // ✅ allow all origins
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // Allow non-browser or same-origin requests
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
